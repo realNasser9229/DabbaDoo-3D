@@ -1,266 +1,257 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>DABBADOO: ALPHA NEON</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DABBADOO DELUXE - Dr. RagorGaming Edition</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap');
-        body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Black Ops One', cursive; }
-        #lock { position: fixed; inset: 0; background: #000; color: #0f0; z-index: 1000; display: none; align-items: center; justify-content: center; text-align: center; border: 5px solid #0f0; }
-        @media (orientation: portrait) { #lock { display: flex; } }
-        #hud { position: absolute; top: 20px; left: 20px; z-index: 10; pointer-events: none; color: #0f0; }
-        #hp-bg { width: 180px; height: 10px; background: #200; border: 2px solid #fff; margin-top: 5px; }
-        #hp-val { width: 100%; height: 100%; background: #f00; box-shadow: 0 0 10px #f00; transition: width 0.2s; }
-        .btn { position: absolute; z-index: 20; border-radius: 50%; border: 3px solid #fff; color: #fff; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); box-shadow: 0 0 15px rgba(255,255,255,0.2); }
-        #jump-btn { bottom: 130px; right: 40px; width: 85px; height: 85px; background: #60f; font-size: 18px; }
-        #shoot-btn { bottom: 20px; right: 30px; width: 115px; height: 115px; background: #f04; font-size: 22px; border-color: #ff0; }
-        #joy-base { position: absolute; bottom: 35px; left: 35px; width: 130px; height: 130px; border: 2px solid #0ff; border-radius: 50%; background: rgba(0,255,255,0.1); }
-        #joy-knob { position: absolute; top: 40px; left: 40px; width: 50px; height: 50px; background: #0ff; border-radius: 50%; box-shadow: 0 0 20px #0ff; }
-        #win { position: fixed; inset: 0; background: rgba(0,0,0,0.9); color: #fff; display: none; align-items: center; justify-content: center; flex-direction: column; z-index: 500; font-size: 60px; text-shadow: 0 0 20px #0f0; transition: opacity 0.5s; }
-        #score { font-size: 20px; margin-top: 10px; }
-        #restart-btn { margin-top: 20px; padding: 10px 20px; font-size: 18px; background: #0f0; color: #000; border: none; border-radius: 10px; cursor: pointer; }
+        body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Courier New', Courier, monospace; }
+        #ui { position: absolute; top: 20px; left: 20px; color: #fff; z-index: 100; pointer-events: none; }
+        .stat { font-size: 28px; font-weight: 900; text-shadow: 3px 3px #f00; letter-spacing: 1px; color: #0f0; margin-bottom: 5px; }
+        #cake-warning { position: absolute; top: 10%; width: 100%; text-align: center; color: #f00; font-weight: bold; font-size: 20px; opacity: 0.5; pointer-events: none; }
+        
+        /* Crosshair */
+        #crosshair { position: absolute; top: 50%; left: 50%; width: 40px; height: 40px; border: 2px solid #0f0; transform: translate(-50%, -50%); z-index: 50; }
+        #crosshair:before { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: #0f0; }
+        #crosshair:after { content: ''; position: absolute; left: 50%; top: 0; width: 2px; height: 100%; background: #0f0; }
+
+        /* Buttons */
+        .btn { position: absolute; border-radius: 10px; background: rgba(50,50,50,0.8); border: 4px solid #fff; display: flex; align-items: center; justify-content: center; color: #fff; z-index: 100; font-weight: bold; }
+        #joy-base { width: 130px; height: 130px; bottom: 40px; left: 40px; background: rgba(255,255,255,0.1); border: 2px solid #555; border-radius: 50%; position: absolute; }
+        #joy-knob { width: 60px; height: 60px; background: #f00; border-radius: 50%; position: absolute; top: 35px; left: 35px; box-shadow: 0 0 20px #f00; }
+        
+        #jump-btn { width: 90px; height: 90px; bottom: 160px; right: 40px; background: #00f; }
+        #shoot-btn { width: 130px; height: 130px; bottom: 20px; right: 30px; font-size: 24px; background: #f00; border-color: #ff0; animation: pulse 0.5s infinite; }
+        
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        
+        #reload-msg { position: absolute; bottom: 30%; left: 50%; transform: translateX(-50%); color: #0f0; font-size: 40px; font-weight: 900; display: none; text-shadow: 0 0 20px #0f0; }
     </style>
 </head>
 <body>
-    <div id="lock"><h1>ROTATE SCREEN ALPHA</h1></div>
-    <div id="win">
-        <h1>THX BRO!</h1>
-        <p id="score" style="font-size: 20px;">VULVIAN LEVEL UP</p>
-        <button id="restart-btn">Next Level</button>
+    <div id="cake-warning">THE CAKE IS A LIE. THE CAKE IS A LIE.</div>
+    <div id="ui">
+        <div class="stat">SIGMA SCORE: <span id="sc">0</span></div>
+        <div class="stat">AMMO: <span id="am">12/12</span></div>
+        <div class="stat" style="color: #0ff;">BROTHER STATUS: CAPTURED</div>
     </div>
-    <div id="hud">V-LVL: <span id="vlvl">1</span><div id="hp-bg"><div id="hp-val"></div></div></div>
+    
+    <div id="reload-msg">SNEEZING DABBADOO...</div>
+    <div id="crosshair"></div>
     <div id="joy-base"><div id="joy-knob"></div></div>
-    <div id="jump-btn" class="btn">JUMP</div>
-    <div id="shoot-btn" class="btn">SNOT</div>
+    <div id="jump-btn" class="btn">DOUBLE<br>JUMP</div>
+    <div id="shoot-btn" class="btn">GRIND</div>
 
     <script src="https://unpkg.com/three@0.155.0/build/three.min.js"></script>
     <script>
-        let scene, camera, renderer, gun, clock;
-        let platforms = [], enemies = [], bullets = [], particles = [];
-        let vLvl = 1, hp = 100, isPlaying = true, jumps = 0, velY = 0, score = 0;
-        let move = { x: 0, y: 0 }, look = { x: 0, y: 0 }, touches = { move: null, look: null, lx: 0, ly: 0 };
-        let boobi, cage, groundCheck = 0;
-        let audioEnabled = true;
+        let scene, camera, renderer, gun, clock, shake = 0.05;
+        let bullets = [], enemies = [], snotParticles = [];
+        let score = 0, ammo = 12, reloading = false, jumps = 0;
+        
+        const SENSITIVITY = 0.35;
+        let move = { f: 0, r: 0 }, look = { lon: 0, lat: 0 }, velY = 0;
+        let tData = { lookId: null, moveId: null, lx: 0, ly: 0 };
 
-        // Sound effects
-        const jumpSound = new Audio('https://www.soundjay.com/buttons/sounds/button-13.mp3');
-        const shootSound = new Audio('https://www.soundjay.com/buttons/sounds/button-12.mp3');
-        const winSound = new Audio('https://www.soundjay.com/human/sounds/cheering-1.mp3');
+        init();
+        animate();
 
-        init(); animate();
+        function createFaceTexture(isEvil) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64; canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = 'white'; ctx.fillRect(0,0,64,64);
+            ctx.fillStyle = 'black';
+            // Eyes
+            ctx.fillRect(15, 20, 8, 8); ctx.fillRect(40, 20, 8, 8);
+            // Smirk
+            ctx.beginPath();
+            if(isEvil) { ctx.moveTo(15, 45); ctx.lineTo(50, 40); } 
+            else { ctx.moveTo(15, 45); ctx.lineTo(50, 45); }
+            ctx.lineWidth = 4; ctx.stroke();
+            return new THREE.CanvasTexture(canvas);
+        }
 
         function init() {
             scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2(0x000, 0.02);
-            camera = new THREE.PerspectiveCamera(85, window.innerWidth/window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            scene.background = new THREE.Color(0x050505);
+            scene.fog = new THREE.Fog(0x000000, 10, 100);
+            clock = new THREE.Clock();
+            
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: false }); // Crunchy pixel look
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
 
-            const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-            const pLight = new THREE.PointLight(0x0f0, 2, 50);
-            scene.add(ambient, pLight);
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(5, 10, 7);
+            scene.add(light, new THREE.AmbientLight(0x404040));
 
-            // Background music
-            const bgMusic = new Audio('https://www.soundjay.com/ambience/sounds/ambience-loop-1.mp3');
-            bgMusic.loop = true;
-            bgMusic.play();
+            // Platforms
+            const grid = new THREE.GridHelper(200, 40, 0xff0000, 0x222222);
+            scene.add(grid);
 
-            // ARM
+            // Vulvian's Blocky Hands
+            const handMat = new THREE.MeshStandardMaterial({color: 0xffffff});
+            const leftHand = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.4), handMat);
+            leftHand.position.set(-0.5, -0.4, -0.6);
+            camera.add(leftHand);
+
+            // The Gun
             gun = new THREE.Group();
-            const arm = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.25, 0.8), new THREE.MeshStandardMaterial({color: 0x111}));
-            const neon = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.9), new THREE.MeshStandardMaterial({color: 0x0f0, emissive: 0x0f0}));
-            arm.position.set(0.5, -0.4, -0.6); neon.position.set(0.5, -0.35, -0.6);
-            gun.add(arm, neon); camera.add(gun); scene.add(camera);
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.2, 0.8), new THREE.MeshStandardMaterial({color: 0x111111}));
+            const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.5), new THREE.MeshStandardMaterial({color: 0x333333}));
+            barrel.rotation.x = Math.PI/2; barrel.position.z = -0.5;
+            gun.add(body, barrel);
+            gun.position.set(0.4, -0.3, -0.7);
+            camera.add(gun);
+            scene.add(camera);
 
-            build();
-            
-            const joy = document.getElementById('joy-base'), knob = document.getElementById('joy-knob');
-            window.addEventListener('touchstart', e => {
-                for(let t of e.changedTouches) {
-                    let r = joy.getBoundingClientRect();
-                    if(t.clientX > r.left && t.clientX < r.right && t.clientY > r.top && t.clientY < r.bottom) touches.move = t.identifier;
-                    else if(!touches.look) { touches.look = t.identifier; touches.lx = t.clientX; touches.ly = t.clientY; }
-                }
-            });
-            window.addEventListener('touchmove', e => {
-                for(let t of e.changedTouches) {
-                    if(t.identifier === touches.move) {
-                        let r = joy.getBoundingClientRect(), dx = t.clientX-(r.left+65), dy = t.clientY-(r.top+65);
-                        let d = Math.min(Math.sqrt(dx*dx+dy*dy), 55), a = Math.atan2(dy, dx);
-                        knob.style.transform = `translate(${Math.cos(a)*d}px, ${Math.sin(a)*d}px)`;
-                        move.x = Math.cos(a)*(d/55); move.y = -Math.sin(a)*(d/55);
-                    }
-                    if(t.identifier === touches.look) {
-                        look.x -= (t.clientX - touches.lx) * 0.3; look.y -= (t.clientY - touches.ly) * 0.3;
-                        touches.lx = t.clientX; touches.ly = t.clientY;
-                    }
-                }
-            });
-            window.addEventListener('touchend', e => {
-                for(let t of e.changedTouches) {
-                    if(t.identifier === touches.move) { touches.move=null; move.x=0; move.y=0; knob.style.transform='none'; }
-                    if(t.identifier === touches.look) touches.look=null;
-                }
-            });
-            document.getElementById('jump-btn').ontouchstart = (e) => { 
-                e.preventDefault();
-                if(groundCheck > 0 || jumps < 2) {
-                    velY = 0.36; jumps++; groundCheck = 0;
-                    if (audioEnabled) jumpSound.play();
-                }
-            };
-            document.getElementById('shoot-btn').ontouchstart = (e) => {
-                e.preventDefault();
-                fire();
-                if (audioEnabled) shootSound.play();
-            };
-            document.getElementById('restart-btn').addEventListener('click', () => {
-                win();
-            });
+            for(let i=0; i<10; i++) spawnBoobasta();
+            setupTouch();
         }
 
-        function build() {
-            platforms.forEach(p => scene.remove(p)); enemies.forEach(e => scene.remove(e));
-            if(cage) scene.remove(cage); if(boobi) scene.remove(boobi);
-            platforms = []; enemies = []; isPlaying = true; camera.position.set(0, 5, 0);
-            score = 0;
-            updateScore();
+        function spawnBoobasta() {
+            const boobasta = new THREE.Group();
+            const body = new THREE.Mesh(new THREE.BoxGeometry(1, 1.5, 0.6), new THREE.MeshStandardMaterial({color: 0x888888}));
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.7), new THREE.MeshStandardMaterial({map: createFaceTexture(true)}));
+            head.position.y = 1.1;
+            const armL = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1, 0.4), new THREE.MeshStandardMaterial({color: 0x888888}));
+            armL.position.set(-0.7, 0.2, 0); armL.rotation.z = 1.2; // T-Pose energy
+            const armR = armL.clone(); armR.position.x = 0.7; armR.rotation.z = -1.2;
             
-            addBox(0, 0, 0, 20, 20, 0x222222); // Start
-            let z = -18, y = 0;
-            for(let i=0; i < 6+vLvl; i++) {
-                let x = (Math.random()-0.5)*15, size = 10 - (vLvl*0.2);
-                y += (Math.random()-0.3)*3.5; z -= 16;
-                addBox(x, y, z, size, size, 0x0055ff);
-                if(i % 2 === 1) spawnMob(x, y+3, z);
+            boobasta.add(body, head, armL, armR);
+            boobasta.position.set(Math.random()*80-40, 0.75, Math.random()*-80-10);
+            scene.add(boobasta);
+            enemies.push(boobasta);
+        }
+
+        function spawnSnot() {
+            for(let i=0; i<5; i++) {
+                const p = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({color: 0x00ff00}));
+                p.position.copy(camera.position).add(new THREE.Vector3(0,-0.2,-0.5).applyQuaternion(camera.quaternion));
+                p.userData.v = new THREE.Vector3((Math.random()-0.5)*0.1, 0.1, (Math.random()-0.5)*0.1);
+                p.userData.life = 1.0;
+                scene.add(p); snotParticles.push(p);
             }
-            addBox(0, y, z-20, 15, 15, 0xff0055);
-            spawnRescue(0, y+2, z-20);
         }
 
-        function addBox(x, y, z, w, d, col) {
-            const b = new THREE.Mesh(new THREE.BoxGeometry(w, 2, d), new THREE.MeshStandardMaterial({color: col, emissive: col, emissiveIntensity: 0.2}));
-            b.position.set(x, y, z);
-            b.userData.b = { x: w/2 + 0.7, z: d/2 + 0.7, y: y+1.1 };
-            scene.add(b); platforms.push(b);
+        function setupTouch() {
+            const joy = document.getElementById('joy-base'), knob = document.getElementById('joy-knob');
+            window.ontouchstart = e => {
+                for(let t of e.changedTouches) {
+                    if (t.clientX > window.innerWidth/2) { tData.lookId = t.identifier; tData.lx = t.clientX; tData.ly = t.clientY; }
+                    let r = joy.getBoundingClientRect();
+                    if (t.clientX > r.left && t.clientX < r.right && t.clientY > r.top && t.clientY < r.bottom) tData.moveId = t.identifier;
+                }
+            };
+            window.ontouchmove = e => {
+                for(let t of e.changedTouches) {
+                    if (t.identifier === tData.lookId) {
+                        look.lon -= (t.clientX - tData.lx) * SENSITIVITY;
+                        look.lat -= (t.clientY - tData.ly) * SENSITIVITY;
+                        tData.lx = t.clientX; tData.ly = t.clientY;
+                    }
+                    if (t.identifier === tData.moveId) {
+                        let r = joy.getBoundingClientRect(), dx = t.clientX-(r.left+65), dy = t.clientY-(r.top+65);
+                        let d = Math.min(Math.sqrt(dx*dx+dy*dy), 60), a = Math.atan2(dy, dx);
+                        knob.style.transform = `translate(${Math.cos(a)*d}px, ${Math.sin(a)*d}px)`;
+                        move.f = -Math.sin(a)*(d/60); move.r = Math.cos(a)*(d/60);
+                    }
+                }
+            };
+            window.ontouchend = e => {
+                for(let t of e.changedTouches) {
+                    if (t.identifier === tData.lookId) tData.lookId = null;
+                    if (t.identifier === tData.moveId) { tData.moveId = null; move.f = 0; move.r = 0; knob.style.transform = `translate(0,0)`; }
+                }
+            };
+            document.getElementById('shoot-btn').ontouchstart = e => { e.preventDefault(); shoot(); };
+            document.getElementById('jump-btn').ontouchstart = e => { 
+                e.preventDefault(); 
+                if(jumps < 2) { 
+                    velY = 0.25; jumps++; 
+                    // Halo glow effect
+                    const halo = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.05), new THREE.MeshBasicMaterial({color: 0xffff00}));
+                    halo.position.copy(camera.position).y -= 1;
+                    halo.rotation.x = Math.PI/2;
+                    scene.add(halo);
+                    setTimeout(() => scene.remove(halo), 200);
+                } 
+            };
         }
 
-        function spawnMob(x, y, z) {
-            const m = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshStandardMaterial({color: 0xff4400, emissive: 0xff0000}));
-            m.position.set(x, y, z); m.userData = { hp: 1+vLvl, s: 0.05+(vLvl*0.01) };
-            scene.add(m); enemies.push(m);
+        function shoot() {
+            if (reloading || ammo <= 0) return;
+            ammo--; document.getElementById('am').innerText = ammo + "/12";
+            
+            const b = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.2), new THREE.MeshBasicMaterial({color: 0xffff00}));
+            b.position.copy(camera.position);
+            b.userData.v = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion).multiplyScalar(1.5);
+            scene.add(b); bullets.push(b);
+
+            gun.position.z = -0.5; // Kickback
+            setTimeout(() => gun.position.z = -0.7, 50);
+            
+            if(ammo === 0) doReload();
         }
 
-        function spawnRescue(x, y, z) {
-            cage = new THREE.Mesh(new THREE.BoxGeometry(5, 6, 5), new THREE.MeshStandardMaterial({color: 0xffffff, wireframe: true}));
-            cage.position.set(x, y+2, z);
-            boobi = new THREE.Mesh(new THREE.SphereGeometry(1.2), new THREE.MeshStandardMaterial({color: 0xff0000, emissive: 0xff0000}));
-            boobi.position.copy(cage.position); scene.add(cage, boobi);
-        }
-
-        function fire() {
-            const b = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.6), new THREE.MeshBasicMaterial({color: 0x0f0}));
-            b.rotation.x = Math.PI/2; b.position.copy(camera.position);
-            const d = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
-            b.lookAt(camera.position.clone().add(d));
-            b.userData.v = d.multiplyScalar(2.8); scene.add(b); bullets.push(b);
-            gun.position.z += 0.2; setTimeout(()=>gun.position.z=0, 50);
+        function doReload() {
+            reloading = true;
+            document.getElementById('reload-msg').style.display = 'block';
+            let interval = setInterval(spawnSnot, 100);
+            setTimeout(() => {
+                clearInterval(interval);
+                ammo = 12; reloading = false;
+                document.getElementById('am').innerText = "12/12";
+                document.getElementById('reload-msg').style.display = 'none';
+            }, 1500);
         }
 
         function animate() {
-            requestAnimationFrame(animate); if(!isPlaying) return;
-            look.y = Math.max(-85, Math.min(85, look.y));
+            requestAnimationFrame(animate);
+            const time = performance.now() * 0.002;
+            
+            // Look & Movement
+            look.lat = Math.max(-85, Math.min(85, look.lat));
             camera.rotation.order = 'YXZ';
-            camera.rotation.y = THREE.MathUtils.degToRad(look.x); camera.rotation.x = THREE.MathUtils.degToRad(look.y);
-            
-            let f = new THREE.Vector3(move.x, 0, -move.y).applyQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0), camera.rotation.y));
-            camera.position.add(f.multiplyScalar(0.28));
-            
-            velY -= 0.016; camera.position.y += velY;
-            groundCheck--; 
+            camera.rotation.y = THREE.MathUtils.degToRad(look.lon);
+            camera.rotation.x = THREE.MathUtils.degToRad(look.lat);
 
-            platforms.forEach(p => {
-                const b = p.userData.b;
-                if(Math.abs(camera.position.x-p.position.x) < b.x && Math.abs(camera.position.z-p.position.z) < b.z) {
-                    if(camera.position.y > b.y && camera.position.y < b.y + 1.8) {
-                        camera.position.y = b.y + 0.9; velY = 0; jumps = 0; groundCheck = 10;
-                    }
-                }
+            camera.translateZ(-move.f * 0.2); camera.translateX(move.r * 0.2);
+            
+            // Earthquake SFX (Visual)
+            camera.position.x += (Math.random()-0.5) * 0.02;
+            camera.position.z += (Math.random()-0.5) * 0.02;
+
+            // Gravity
+            camera.position.y += velY;
+            if(camera.position.y > 1.7) velY -= 0.012; 
+            else { camera.position.y = 1.7; velY = 0; jumps = 0; }
+
+            // Gun Bob
+            gun.position.y = -0.3 + Math.sin(time*10)*0.01;
+
+            // Particles & Bullets
+            snotParticles.forEach((p, i) => {
+                p.position.add(p.userData.v); p.userData.life -= 0.02;
+                if(p.userData.life <= 0) { scene.remove(p); snotParticles.splice(i,1); }
             });
 
-            if(camera.position.y < -35) { hp -= 25; camera.position.set(0, 10, 0); updateHUD(); }
-            
-            enemies.forEach(e => {
-                let d = e.position.distanceTo(camera.position);
-                if(d < 25) {
-                    e.lookAt(camera.position.x, e.position.y, camera.position.z);
-                    e.position.add(new THREE.Vector3().subVectors(camera.position, e.position).normalize().multiplyScalar(e.userData.s));
-                    if(d < 2.2) { hp -= 0.6; updateHUD(); }
-                }
-            });
-
-            bullets.forEach((b, i) => {
-                b.position.add(b.userData.v);
+            for(let i=bullets.length-1; i>=0; i--) {
+                bullets[i].position.add(bullets[i].userData.v);
                 enemies.forEach((e, j) => {
-                    if(b.position.distanceTo(e.position) < 2) {
-                        scene.remove(e); enemies.splice(j,1);
-                        scene.remove(b); bullets.splice(i,1);
-                        score += 10;
-                        updateScore();
-                        // Add explosion effect
-                        for (let i = 0; i < 10; i++) {
-                            createParticle(b.position, 0x0f0, 0.2);
-                        }
+                    if(bullets[i].position.distanceTo(e.position) < 1.5) {
+                        scene.remove(e); enemies.splice(j, 1);
+                        scene.remove(bullets[i]); bullets.splice(i,1);
+                        score += 100; document.getElementById('sc').innerText = score;
+                        spawnBoobasta();
                     }
                 });
-            });
-
-            if(boobi) {
-                boobi.rotation.y += 0.05;
-                if(camera.position.distanceTo(boobi.position) < 5) {
-                    win();
-                    if (audioEnabled) winSound.play();
-                }
-            }
-
-            // Update particles
-            for (let p of particles) {
-                p.position.y += 0.05;
-                p.scale.multiplyScalar(0.95);
-                if (p.scale.x < 0.1) {
-                    scene.remove(p);
-                    particles.splice(particles.indexOf(p), 1);
-                }
+                if(bullets[i] && bullets[i].position.length() > 200) { scene.remove(bullets[i]); bullets.splice(i,1); }
             }
 
             renderer.render(scene, camera);
-        }
-
-        function updateHUD() {
-            document.getElementById('hp-val').style.width = hp + "%";
-            if(hp <= 0) { alert("NO ALPHA DETECTED. RESTARTING."); location.reload(); }
-        }
-
-        function updateScore() {
-            document.getElementById('score').innerText = "Score: " + score;
-        }
-
-        function createParticle(pos, color, size) {
-            const geo = new THREE.SphereGeometry(size, 4, 4);
-            const mat = new THREE.MeshBasicMaterial({ color: color });
-            const p = new THREE.Mesh(geo, mat);
-            p.position.copy(pos);
-            p.scale.set(1, 1, 1);
-            scene.add(p);
-            particles.push(p);
-        }
-
-        function win() {
-            isPlaying = false; vLvl++; document.getElementById('vlvl').innerText = vLvl;
-            document.getElementById('win').style.display = 'flex';
-            setTimeout(() => { build(); }, 2000);
         }
     </script>
 </body>
