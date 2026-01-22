@@ -19,7 +19,7 @@
         /* Buttons */
         .btn { position: absolute; border-radius: 50%; background: rgba(50,50,50,0.9); border: 4px solid #fff; display: flex; align-items: center; justify-content: center; color: #fff; z-index: 100; font-weight: bold; text-shadow: 2px 2px #000; }
         #joy-base { width: 140px; height: 140px; bottom: 40px; left: 40px; background: rgba(255,255,255,0.1); border: 3px solid #555; border-radius: 50%; position: absolute; }
-        #joy-knob { width: 70px; height: 70px; background: #f00; border-radius: 50%; position: absolute; top: 35px; left: 35px; box-shadow: 0 0 30px #f00; transition: all 0.05s; }
+        #joy-knob { width: 70px; height: 70px; background: #f00; border-radius: 50%; position: absolute; top: 35px; left: 35px; box-shadow: 0 0 30px #f00; transition: transform 0.05s; }
         
         #jump-btn { width: 100px; height: 100px; bottom: 200px; right: 40px; background: #00f; font-size: 18px; }
         #shoot-btn { width: 140px; height: 140px; bottom: 20px; right: 30px; font-size: 28px; background: #f00; border-color: #ff0; animation: pulse 0.8s infinite; }
@@ -29,7 +29,8 @@
         #reload-msg { position: absolute; bottom: 30%; left: 50%; transform: translateX(-50%); color: #0f0; font-size: 48px; font-weight: 900; display: none; text-shadow: 0 0 30px #0f0; animation: bounce 0.5s infinite; }
         @keyframes bounce { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-20px); } }
 
-        #win-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #0ff; font-size: 60px; font-weight: 900; text-shadow: 0 0 40px #0ff; display: none; z-index: 200; }
+        #win-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #0ff; font-size: 60px; font-weight: 900; text-shadow: 0 0 40px #0ff; display: none; z-index: 200; animation: winpulse 1s infinite; }
+        @keyframes winpulse { 0% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.2); } 100% { transform: translate(-50%, -50%) scale(1); } }
     </style>
 </head>
 <body>
@@ -42,7 +43,7 @@
     </div>
     
     <div id="reload-msg">SNEEZING DABBADOO...</div>
-    <div id="win-msg">THX BRO<br>VULVIAN WINS</div>
+    <div id="win-msg">THX BRO<br>VULVIAN WINS<br>YABBA DABBA DOO!!</div>
     <div id="crosshair"></div>
     <div id="joy-base"><div id="joy-knob"></div></div>
     <div id="jump-btn" class="btn">DOUBLE<br>JUMP</div>
@@ -50,7 +51,7 @@
 
     <script src="https://unpkg.com/three@0.155.0/build/three.min.js"></script>
     <script>
-        let scene, camera, renderer, gun, clock, shakeIntensity = 0.03;
+        let scene, camera, renderer, gun, clock;
         let bullets = [], enemies = [], snotParticles = [];
         let score = 0, kills = 0, ammo = 12, reloading = false, jumps = 0;
         let brotherBarrier = null, brotherSaved = false;
@@ -68,15 +69,10 @@
             const ctx = canvas.getContext('2d');
             ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,64,64);
             ctx.fillStyle = '#000000';
-            // Eyes
             ctx.fillRect(15, 18, 10, 12); ctx.fillRect(39, 18, 10, 12);
-            // Mouth
             ctx.beginPath();
-            if(isEvil) {
-                ctx.moveTo(12, 45); ctx.quadraticCurveTo(32, 55, 52, 45);
-            } else {
-                ctx.moveTo(12, 45); ctx.quadraticCurveTo(32, 35, 52, 45);
-            }
+            if(isEvil) ctx.moveTo(12, 45), ctx.quadraticCurveTo(32, 55, 52, 45);
+            else ctx.moveTo(12, 45), ctx.quadraticCurveTo(32, 35, 52, 45);
             ctx.lineWidth = 5; ctx.stroke();
             return new THREE.CanvasTexture(canvas);
         }
@@ -90,40 +86,27 @@
             camera = new THREE.PerspectiveCamera(80, window.innerWidth/window.innerHeight, 0.1, 200);
             camera.position.y = 1.7;
             
-            renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
+            renderer = new THREE.WebGLRenderer({ antialias: false });
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
 
             const light = new THREE.DirectionalLight(0xaaaaaa, 1.5);
             light.position.set(5, 15, 10);
-            scene.add(light);
-            scene.add(new THREE.AmbientLight(0x404060, 1));
+            scene.add(light, new THREE.AmbientLight(0x404060, 1));
 
-            // Ground
-            const ground = new THREE.Mesh(
-                new THREE.PlaneGeometry(200, 200),
-                new THREE.MeshStandardMaterial({ color: 0x222233 })
-            );
+            const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({color: 0x222233}));
             ground.rotation.x = -Math.PI/2;
             ground.position.y = -0.1;
             scene.add(ground);
 
-            // Platforms & obstacles
             for(let i = 0; i < 30; i++) {
-                const plat = new THREE.Mesh(
-                    new THREE.BoxGeometry(8 + Math.random()*12, 0.5, 8 + Math.random()*12),
-                    new THREE.MeshStandardMaterial({ color: 0x444455 })
-                );
-                plat.position.set(Math.random()*100-50, 0, Math.random()*-100-20);
+                const plat = new THREE.Mesh(new THREE.BoxGeometry(8 + Math.random()*12, 0.5, 8 + Math.random()*12), new THREE.MeshStandardMaterial({color: 0x444455}));
+                plat.position.set(Math.random()*100-50, Math.random()*5, Math.random()*-100-20);
                 scene.add(plat);
             }
 
-            // Brother barrier + Boobi Doodi
-            brotherBarrier = new THREE.Mesh(
-                new THREE.BoxGeometry(6, 8, 1),
-                new THREE.MeshStandardMaterial({ color: 0x888888, transparent: true, opacity: 0.6 })
-            );
+            brotherBarrier = new THREE.Mesh(new THREE.BoxGeometry(6, 8, 1), new THREE.MeshStandardMaterial({color: 0x888888, transparent: true, opacity: 0.6}));
             brotherBarrier.position.set(0, 4, -80);
             scene.add(brotherBarrier);
 
@@ -137,7 +120,6 @@
             boobi.position.set(0, 1, -79.5);
             scene.add(boobi);
 
-            // Vulvian's gun
             gun = new THREE.Group();
             const gunBody = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.25, 1), new THREE.MeshStandardMaterial({color: 0x222222}));
             const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.8), new THREE.MeshStandardMaterial({color: 0x111111}));
@@ -147,7 +129,6 @@
             camera.add(gun);
             scene.add(camera);
 
-            // Spawn initial Boobastas
             for(let i=0; i<15; i++) spawnBoobasta();
 
             setupTouch();
@@ -170,43 +151,54 @@
         }
 
         function spawnSnot() {
-            for(let i=0; i<8; i++) {
+            for(let i=0; i<10; i++) {
                 const p = new THREE.Mesh(new THREE.SphereGeometry(0.15), new THREE.MeshBasicMaterial({color: 0x00ff00, transparent: true, opacity: 0.8}));
                 p.position.copy(gun.position).applyQuaternion(camera.quaternion);
                 const dir = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
-                p.userData.v = dir.clone().multiplyScalar(0.3 + Math.random()*0.2).add(new THREE.Vector3((Math.random()-0.5)*0.3, (Math.random()-0.5)*0.3, 0));
+                p.userData.v = dir.clone().multiplyScalar(0.4 + Math.random()*0.3).add(new THREE.Vector3((Math.random()-0.5)*0.4, (Math.random()-0.5)*0.4, 0));
                 p.userData.life = 1.5;
                 scene.add(p); snotParticles.push(p);
             }
         }
 
         function setupTouch() {
-            // Same as before but smoother
             const joy = document.getElementById('joy-base'), knob = document.getElementById('joy-knob');
-            const handleStart = (e, isLook) => {
+            window.ontouchstart = e => {
                 for(let t of e.changedTouches) {
-                    if(isLook && t.clientX > window.innerWidth/2) { tData.lookId = t.identifier; tData.lx = t.clientX; tData.ly = t.clientY; }
-                    if(!isLook) {
-                        let r = joy.getBoundingClientRect();
-                        if(t.clientX > r.left && t.clientX < r.right && t.clientY > r.top && t.clientY < r.bottom) tData.moveId = t.identifier;
+                    if (t.clientX > window.innerWidth/2) { tData.lookId = t.identifier; tData.lx = t.clientX; tData.ly = t.clientY; }
+                    let r = joy.getBoundingClientRect();
+                    if (t.clientX > r.left && t.clientX < r.right && t.clientY > r.top && t.clientY < r.bottom) tData.moveId = t.identifier;
+                }
+            };
+            window.ontouchmove = e => {
+                e.preventDefault();
+                for(let t of e.changedTouches) {
+                    if (t.identifier === tData.lookId) {
+                        look.lon -= (t.clientX - tData.lx) * SENSITIVITY;
+                        look.lat -= (t.clientY - tData.ly) * SENSITIVITY;
+                        look.lat = Math.max(-85, Math.min(85, look.lat));
+                        tData.lx = t.clientX; tData.ly = t.clientY;
+                    }
+                    if (t.identifier === tData.moveId) {
+                        let r = joy.getBoundingClientRect(), dx = t.clientX - (r.left + 70), dy = t.clientY - (r.top + 70);
+                        let dist = Math.min(Math.sqrt(dx*dx + dy*dy), 70);
+                        let angle = Math.atan2(dy, dx);
+                        knob.style.transform = `translate(${dist * Math.cos(angle)}px, ${dist * Math.sin(angle)}px)`;
+                        move.f = -Math.sin(angle) * (dist / 70);
+                        move.r = Math.cos(angle) * (dist / 70);
                     }
                 }
             };
-            window.ontouchstart = e => { handleStart(e, true); handleStart(e, false); };
-            // Rest same as your original but with smoother knob movement
-            // ... (keep your original move/look logic, it's solid)
+            window.ontouchend = e => {
+                for(let t of e.changedTouches) {
+                    if (t.identifier === tData.lookId) tData.lookId = null;
+                    if (t.identifier === tData.moveId) { tData.moveId = null; move.f = 0; move.r = 0; knob.style.transform = 'translate(0,0)'; }
+                }
+            };
             document.getElementById('shoot-btn').ontouchstart = e => { e.preventDefault(); shoot(); };
             document.getElementById('jump-btn').ontouchstart = e => { 
                 e.preventDefault(); 
-                if(jumps < 2) { 
-                    velY = 0.3; jumps++; 
-                    // Better halo
-                    const halo = new THREE.Mesh(new THREE.RingGeometry(0.8, 1.2, 32), new THREE.MeshBasicMaterial({color: 0xffff00, side: THREE.DoubleSide, transparent: true, opacity: 0.6}));
-                    halo.position.copy(camera.position);
-                    halo.rotation.x = -Math.PI/2;
-                    scene.add(halo);
-                    setTimeout(() => scene.remove(halo), 400);
-                } 
+                if(jumps < 2) { velY = 0.3; jumps++; }
             };
         }
 
@@ -219,7 +211,6 @@
             b.userData.v = new THREE.Vector3(0,0,-2).applyQuaternion(camera.quaternion);
             scene.add(b); bullets.push(b);
 
-            // Stronger kickback + flash
             gun.position.z = -0.4;
             setTimeout(() => gun.position.z = -0.8, 80);
 
@@ -250,37 +241,42 @@
             requestAnimationFrame(animate);
             const delta = clock.getDelta();
 
-            // Constant earthquake shake
-            camera.position.x += (Math.random()-0.5) * shakeIntensity;
-            camera.position.z += (Math.random()-0.5) * shakeIntensity;
+            camera.rotation.order = 'YXZ';
+            camera.rotation.y = THREE.MathUtils.degToRad(look.lon);
+            camera.rotation.x = THREE.MathUtils.degToRad(look.lat);
 
-            // Movement & look (your original logic here)
+            camera.translateZ(move.f * delta * 20);
+            camera.translateX(move.r * delta * 20);
 
-            // Boobasta AI - chase player
+            camera.position.y += velY * delta * 20;
+            velY -= 0.5 * delta * 20;
+            if(camera.position.y <= 1.7) { camera.position.y = 1.7; velY = 0; jumps = 0; }
+
+            camera.position.x += (Math.random()-0.5) * 0.03;
+            camera.position.z += (Math.random()-0.5) * 0.03;
+
             enemies.forEach(e => {
                 const dir = camera.position.clone().sub(e.position).normalize();
-                e.position.add(dir.multiplyScalar(e.userData.speed));
+                e.position.add(dir.multiplyScalar(e.userData.speed * 30 * delta));
                 e.lookAt(camera.position);
             });
 
-            // Bullets & hits
             for(let i=bullets.length-1; i>=0; i--) {
                 const b = bullets[i];
-                b.position.add(b.userData.v.clone().multiplyScalar(delta*30));
+                b.position.add(b.userData.v.clone().multiplyScalar(delta * 50));
                 enemies.forEach((e, j) => {
                     if(b.position.distanceTo(e.position) < 2) {
                         scene.remove(e); enemies.splice(j,1);
                         kills++; document.getElementById('kills').innerText = kills;
                         score += 100; document.getElementById('sc').innerText = score;
-                        spawnBoobasta(); // Infinite rage
+                        spawnBoobasta();
                     }
                 });
                 if(b.position.length() > 200) { scene.remove(b); bullets.splice(i,1); }
             }
 
-            // Snot particles fade
             snotParticles.forEach((p, i) => {
-                p.position.add(p.userData.v);
+                p.position.add(p.userData.v.clone().multiplyScalar(delta * 20));
                 p.userData.life -= delta;
                 p.material.opacity = p.userData.life;
                 if(p.userData.life <= 0) { scene.remove(p); snotParticles.splice(i,1); }
