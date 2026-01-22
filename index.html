@@ -1,22 +1,135 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>DabbaDoo 🔥</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DabbaDoo Mobile 🔥</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; cursor: crosshair; }
+        body { margin: 0; overflow: hidden; background: #000; touch-action: none; }
         #crosshair {
             position: absolute; top: 50%; left: 50%;
-            width: 8px; height: 8px; background: white;
+            width: 10px; height: 10px; border: 2px solid white;
             border-radius: 50%; transform: translate(-50%, -50%);
-            pointer-events: none; mix-blend-mode: difference;
+            z-index: 10; pointer-events: none;
+        }
+        #info {
+            position: absolute; top: 10px; width: 100%; text-align: center;
+            color: lime; font-family: monospace; z-index: 20; pointer-events: none;
         }
     </style>
 </head>
 <body>
+    <div id="info">SWIPE TO LOOK | TAP TO SHOOT</div>
     <div id="crosshair"></div>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/controls/PointerLockControls.js"></script>
-    <script src="game.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.155.0/three.min.js"></script>
+
+    <script>
+        let scene, camera, renderer, bullets = [], enemies = [];
+        let lon = 0, lat = 0, phi = 0, theta = 0;
+        let touchX = 0, touchY = 0, savedLon = 0, savedLat = 0;
+
+        init();
+        animate();
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x111111);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 1.6, 5);
+
+            renderer = new THREE.WebGLRenderer({ antialias: false }); // Disable antialias for mobile speed
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Don't overwork the GPU
+            document.body.appendChild(renderer.domElement);
+
+            // Lighting
+            const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
+            scene.add(light);
+
+            // Floor
+            const grid = new THREE.GridHelper(100, 20, 0xff00ff, 0x333333);
+            scene.add(grid);
+
+            // Enemies
+            for (let i = 0; i < 10; i++) {
+                const enemy = new THREE.Mesh(
+                    new THREE.BoxGeometry(1, 2, 1),
+                    new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+                );
+                enemy.position.set(Math.random() * 20 - 10, 1, Math.random() * -20);
+                scene.add(enemy);
+                enemies.push(enemy);
+            }
+
+            // Mobile Touch Events
+            window.addEventListener('touchstart', (e) => {
+                touchX = e.touches[0].clientX;
+                touchY = e.touches[0].clientY;
+                savedLon = lon;
+                savedLat = lat;
+            }, { passive: false });
+
+            window.addEventListener('touchmove', (e) => {
+                lon = (touchX - e.touches[0].clientX) * 0.2 + savedLon;
+                lat = (e.touches[0].clientY - touchY) * 0.2 + savedLat;
+                lat = Math.max(-85, Math.min(85, lat));
+            }, { passive: false });
+
+            window.addEventListener('touchend', shoot);
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function shoot() {
+            const b = new THREE.Mesh(
+                new THREE.SphereGeometry(0.2, 8, 8), 
+                new THREE.MeshBasicMaterial({ color: 0xffff00 })
+            );
+            b.position.copy(camera.position);
+            const vector = new THREE.Vector3(0, 0, -1);
+            vector.applyQuaternion(camera.quaternion);
+            b.userData.v = vector.multiplyScalar(0.8);
+            scene.add(b);
+            bullets.push(b);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Convert touch coordinates to camera rotation
+            lat = Math.max(-85, Math.min(85, lat));
+            phi = THREE.MathUtils.degToRad(90 - lat);
+            theta = THREE.MathUtils.degToRad(lon);
+
+            const target = new THREE.Vector3();
+            target.x = Math.sin(phi) * Math.cos(theta);
+            target.y = Math.cos(phi);
+            target.z = Math.sin(phi) * Math.sin(theta);
+            camera.lookAt(camera.position.clone().add(target));
+
+            // Bullet Logic
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                bullets[i].position.add(bullets[i].userData.v);
+                enemies.forEach(e => {
+                    if (bullets[i] && bullets[i].position.distanceTo(e.position) < 1.5) {
+                        e.position.y = -10; // "Kill" enemy
+                    }
+                });
+                if (bullets[i].position.length() > 50) {
+                    scene.remove(bullets[i]);
+                    bullets.splice(i, 1);
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+    </script>
 </body>
 </html>
