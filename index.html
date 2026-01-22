@@ -2,68 +2,90 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DABBADOO: RESCUE MISSION</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
+    <title>DABBADOO ULTRA DELUXE</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Comic Sans MS', sans-serif; }
-        #ui { position: absolute; top: 10px; left: 10px; color: #fff; z-index: 100; pointer-events: none; width: 95%; }
-        .stat-row { display: flex; justify-content: space-between; width: 100%; }
-        .stat { font-size: 20px; font-weight: 900; text-shadow: 2px 2px #f00; color: #0f0; }
+        body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Impact', sans-serif; }
         
-        /* Crosshair Fix */
-        #crosshair { position: absolute; top: 50%; left: 50%; width: 30px; height: 30px; transform: translate(-50%, -50%); z-index: 50; pointer-events: none; }
-        .ch-line { position: absolute; background: #0f0; box-shadow: 0 0 5px #0f0; transition: transform 0.1s; }
-        #ch-top { width: 2px; height: 10px; left: 14px; top: 0; }
-        #ch-bot { width: 2px; height: 10px; left: 14px; bottom: 0; }
-        #ch-left { height: 2px; width: 10px; top: 14px; left: 0; }
-        #ch-right { height: 2px; width: 10px; top: 14px; right: 0; }
-        .recoil { transform: scale(1.5); }
+        /* Orientation Lock */
+        #rotate-warning { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #f00; color: #fff; z-index: 1000; 
+            display: none; align-items: center; justify-content: center; 
+            text-align: center; font-size: 30px; 
+        }
+        @media (orientation: portrait) { #rotate-warning { display: flex; } }
 
-        /* Buttons */
-        .btn { position: absolute; border-radius: 15px; background: rgba(0,0,0,0.6); border: 3px solid #fff; display: flex; align-items: center; justify-content: center; color: #fff; z-index: 100; text-align: center; font-weight: bold; }
-        #joy-base { width: 120px; height: 120px; bottom: 30px; left: 30px; background: rgba(255,255,255,0.1); border-radius: 50%; position: absolute; border: 1px solid #0ff; }
-        #joy-knob { width: 50px; height: 50px; background: #0ff; border-radius: 50%; position: absolute; top: 35px; left: 35px; }
-        
-        #jump-btn { width: 80px; height: 80px; bottom: 140px; right: 30px; background: #f0f; font-size: 14px; }
-        #shoot-btn { width: 110px; height: 110px; bottom: 20px; right: 20px; font-size: 22px; background: #f00; color: #ff0; border-color: #ff0; box-shadow: 0 0 20px #f00; }
-        
-        #msg-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; font-size: 40px; font-weight: 900; text-align: center; display: none; z-index: 200; text-shadow: 4px 4px #f00; width: 80%; }
-        #hp-bar { width: 200px; height: 20px; background: #300; border: 2px solid #fff; margin-top: 5px; }
-        #hp-fill { width: 100%; height: 100%; background: #f00; transition: width 0.3s; }
+        /* HUD */
+        #ui { position: absolute; top: 15px; left: 15px; color: #fff; z-index: 100; pointer-events: none; }
+        .stat { font-size: 24px; color: #0f0; text-shadow: 2px 2px #000; margin-bottom: 5px; }
+        #hp-container { width: 200px; height: 15px; background: #333; border: 2px solid #fff; }
+        #hp-fill { width: 100%; height: 100%; background: #f00; transition: 0.2s; }
+
+        /* Crosshair */
+        #crosshair { 
+            position: absolute; top: 50%; left: 50%; width: 40px; height: 40px; 
+            transform: translate(-50%, -50%); z-index: 50; pointer-events: none; 
+        }
+        #crosshair:before, #crosshair:after { 
+            content: ''; position: absolute; background: #0f0; box-shadow: 0 0 10px #0f0; 
+        }
+        #crosshair:before { width: 100%; height: 2px; top: 19px; }
+        #crosshair:after { width: 2px; height: 100%; left: 19px; }
+
+        /* Controls */
+        .btn { 
+            position: absolute; border-radius: 20px; background: rgba(0,0,0,0.7); 
+            border: 4px solid #fff; display: flex; align-items: center; 
+            justify-content: center; color: #fff; z-index: 100; font-weight: bold; 
+        }
+        #joy-base { 
+            width: 140px; height: 140px; bottom: 30px; left: 30px; 
+            background: rgba(255,255,255,0.1); border-radius: 50%; 
+            position: absolute; border: 2px solid #0ff; 
+        }
+        #joy-knob { 
+            width: 60px; height: 60px; background: #0ff; border-radius: 50%; 
+            position: absolute; top: 40px; left: 40px; 
+        }
+        #jump-btn { width: 100px; height: 100px; bottom: 150px; right: 40px; background: #00f; }
+        #shoot-btn { 
+            width: 140px; height: 140px; bottom: 20px; right: 20px; 
+            font-size: 28px; background: #f00; border-color: #ff0; 
+        }
+
+        #level-popup { 
+            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); 
+            color: #ff0; font-size: 60px; text-shadow: 5px 5px #f00; 
+            display: none; z-index: 500; text-align: center;
+        }
     </style>
 </head>
 <body>
-    <div id="ui">
-        <div class="stat-row">
-            <div class="stat">LEVEL: <span id="lvl">1</span></div>
-            <div class="stat">AMMO: <span id="am">15/15</span></div>
-        </div>
-        <div class="stat">VULVIAN HP</div>
-        <div id="hp-bar"><div id="hp-fill"></div></div>
-    </div>
-    
-    <div id="msg-overlay">LEVEL CLEAR!</div>
-    
-    <div id="crosshair">
-        <div id="ch-top" class="ch-line"></div>
-        <div id="ch-bot" class="ch-line"></div>
-        <div id="ch-left" class="ch-line"></div>
-        <div id="ch-right" class="ch-line"></div>
-    </div>
+    <div id="rotate-warning">ROTATE SCREEN TO DABBADOO!</div>
+    <div id="level-popup">LEVEL COMPLETE!<br>+DIFFICULTY UP</div>
 
+    <div id="ui">
+        <div class="stat">VULVIAN SIGMA: Lvl <span id="lvl">1</span></div>
+        <div class="stat">AMMO: <span id="am">20/20</span></div>
+        <div id="hp-container"><div id="hp-fill"></div></div>
+    </div>
+    
+    <div id="crosshair"></div>
     <div id="joy-base"><div id="joy-knob"></div></div>
     <div id="jump-btn" class="btn">ALPHA<br>JUMP</div>
     <div id="shoot-btn" class="btn">GRIND</div>
 
     <script src="https://unpkg.com/three@0.155.0/build/three.min.js"></script>
     <script>
-        // --- GAME STATE ---
+        /** DABBADOO ENGINE 3.0 **/
         let scene, camera, renderer, gun, clock;
-        let bullets = [], enemies = [], particles = [], platforms = [];
-        let score = 0, ammo = 15, hp = 100, level = 1, reloading = false, jumps = 0;
-        let boobiDoodi, cage, targetGoal;
+        let bullets = [], enemies = [], platforms = [];
+        let score = 0, ammo = 20, hp = 100, level = 1, reloading = false, jumps = 0;
+        let boobiDoodi, cage, goalReached = false;
         
-        const SENSITIVITY = 0.4;
+        // HIGHER SENSITIVITY FOR ALPHA PLAYERS
+        const SENSITIVITY = 0.8; 
         let move = { f: 0, r: 0 }, look = { lon: 0, lat: 0 }, velY = 0;
         let tData = { lookId: null, moveId: null, lx: 0, ly: 0 };
 
@@ -72,24 +94,23 @@
 
         function init() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a0015);
-            scene.fog = new THREE.FogExp2(0x0a0015, 0.04);
+            scene.background = new THREE.Color(0x000000);
+            scene.fog = new THREE.FogExp2(0x000000, 0.03);
             clock = new THREE.Clock();
             
             camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
             document.body.appendChild(renderer.domElement);
 
-            const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-            const sun = new THREE.PointLight(0x00ffff, 1, 100);
-            sun.position.set(10, 20, 10);
-            scene.add(ambient, sun);
+            const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
+            scene.add(light);
 
-            createVulvianHands();
-            setupLevel(level);
+            createGun();
+            buildLevel();
             setupTouch();
-            
+
             window.addEventListener('resize', () => {
                 camera.aspect = window.innerWidth/window.innerHeight;
                 camera.updateProjectionMatrix();
@@ -97,93 +118,91 @@
             });
         }
 
-        function createVulvianHands() {
+        function createGun() {
             gun = new THREE.Group();
-            const arm = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.8), new THREE.MeshStandardMaterial({color: 0xffffff}));
-            arm.position.set(0.4, -0.4, -0.4);
+            // Blocky hand (The Cake Is A Lie t-shirt color)
+            const hand = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.6), new THREE.MeshStandardMaterial({color: 0x111111}));
+            hand.position.set(0.5, -0.5, -0.5);
             
-            const weaponBody = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.25, 1), new THREE.MeshStandardMaterial({color: 0x111111}));
-            weaponBody.position.set(0.4, -0.3, -0.8);
+            const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 1.2), new THREE.MeshStandardMaterial({color: 0x222222}));
+            barrel.position.set(0.5, -0.4, -1);
             
-            const muzzle = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.2), new THREE.MeshStandardMaterial({color: 0x333333}));
-            muzzle.rotation.x = Math.PI/2;
-            muzzle.position.set(0.4, -0.3, -1.3);
-
-            gun.add(arm, weaponBody, muzzle);
+            gun.add(hand, barrel);
             camera.add(gun);
             scene.add(camera);
         }
 
-        function setupLevel(lvl) {
-            // Clear old level
+        function buildLevel() {
+            // Clean up
             enemies.forEach(e => scene.remove(e));
             platforms.forEach(p => scene.remove(p));
             if(cage) scene.remove(cage);
             if(boobiDoodi) scene.remove(boobiDoodi);
             enemies = []; platforms = []; bullets = [];
+            
+            camera.position.set(0, 5, 5);
+            goalReached = false;
 
-            camera.position.set(0, 2, 0);
-            look.lon = 0; look.lat = 0;
+            // SAFE STARTING PLATFORM (Larger)
+            spawnPlatform(0, 0, 0, 15, 15, 0x00ff00);
 
-            // Spawn Start Platform
-            createPlatform(0, 0, 0, 10, 10);
+            // PROCEDURAL PARKOUR (Gets harder with Level)
+            let currentZ = -10;
+            let currentY = 0;
+            const platformCount = 5 + (level * 2);
 
-            // Level Logic: Parkour Path
-            for(let i=1; i<=10; i++) {
-                let pZ = -i * 12;
-                let pX = Math.sin(i) * 5;
-                let pY = i * 1.5;
-                createPlatform(pX, pY, pZ, 6, 6);
+            for(let i=0; i < platformCount; i++) {
+                currentZ -= 12 + (level * 0.5); // Further apart per level
+                currentY += (Math.random() - 0.2) * 3;
+                let currentX = Math.sin(i) * (5 + level);
                 
-                // Spawn Boobastas on platforms
-                if(i % 2 === 0) spawnBoobasta(pX, pY + 2, pZ);
+                // Platforms are WIDER for safety (8x8 instead of 6x6)
+                spawnPlatform(currentX, currentY, currentZ, 8, 8, 0x00ffff);
+                
+                // More Boobastas per level
+                if(i % 2 === 0) spawnBoobasta(currentX, currentY + 2, currentZ);
             }
 
-            // Final Platform with Cage
-            let finalZ = -140;
-            let finalY = 18;
-            createPlatform(0, finalY, finalZ, 15, 15, 0xff0000);
-            spawnCage(0, finalY + 1, finalZ);
+            // THE CAGE
+            let finalZ = currentZ - 15;
+            spawnPlatform(0, currentY, finalZ, 12, 12, 0xff0000);
+            spawnCage(0, currentY + 1, finalZ);
             
-            document.getElementById('lvl').innerText = lvl;
+            document.getElementById('lvl').innerText = level;
         }
 
-        function createPlatform(x, y, z, w, d, col = 0x00ffcc) {
-            const geo = new THREE.BoxGeometry(w, 1, d);
-            const mat = new THREE.MeshStandardMaterial({color: col, emissive: col, emissiveIntensity: 0.2});
-            const plat = new THREE.Mesh(geo, mat);
+        function spawnPlatform(x, y, z, w, d, col) {
+            const plat = new THREE.Mesh(new THREE.BoxGeometry(w, 1.5, d), new THREE.MeshStandardMaterial({color: col}));
             plat.position.set(x, y, z);
             scene.add(plat);
             platforms.push(plat);
         }
 
         function spawnBoobasta(x, y, z) {
-            const group = new THREE.Group();
-            const body = new THREE.Mesh(new THREE.BoxGeometry(1, 1.5, 0.5), new THREE.MeshStandardMaterial({color: 0x888888}));
-            const head = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), new THREE.MeshStandardMaterial({color: 0xcccccc}));
-            head.position.y = 1.2;
-            group.add(body, head);
-            group.position.set(x, y, z);
-            group.userData = { hp: 2, state: 'idle' };
-            scene.add(group);
-            enemies.push(group);
+            const b = new THREE.Group();
+            const body = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.8, 0.8), new THREE.MeshStandardMaterial({color: 0x777777}));
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.9, 0.9), new THREE.MeshStandardMaterial({color: 0xffffff}));
+            head.position.y = 1.4;
+            b.add(body, head);
+            b.position.set(x, y, z);
+            // Enemies get faster and tougher per level
+            b.userData = { hp: 1 + Math.floor(level/2), speed: 0.03 + (level * 0.01) };
+            scene.add(b);
+            enemies.push(b);
         }
 
         function spawnCage(x, y, z) {
-            cage = new THREE.Group();
-            const bars = new THREE.Mesh(new THREE.BoxGeometry(3, 4, 3), new THREE.MeshStandardMaterial({color: 0x444444, wireframe: true}));
-            cage.add(bars);
+            cage = new THREE.Mesh(new THREE.BoxGeometry(4, 5, 4), new THREE.MeshStandardMaterial({color: 0xffffff, wireframe: true}));
+            cage.position.set(x, y + 1.5, z);
             
             boobiDoodi = new THREE.Group();
-            const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1, 0.4), new THREE.MeshStandardMaterial({color: 0xff0000}));
-            const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), new THREE.MeshStandardMaterial({color: 0xffccaa}));
-            head.position.y = 0.8;
-            boobiDoodi.add(body, head);
-            
-            cage.position.set(x, y+1.5, z);
+            const bBody = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 0.6), new THREE.MeshStandardMaterial({color: 0xff0000}));
+            const bHead = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.7), new THREE.MeshStandardMaterial({color: 0xffccaa}));
+            bHead.position.y = 1;
+            boobiDoodi.add(bBody, bHead);
             boobiDoodi.position.copy(cage.position);
+            
             scene.add(cage, boobiDoodi);
-            targetGoal = cage.position;
         }
 
         function setupTouch() {
@@ -203,57 +222,51 @@
                         tData.lx = t.clientX; tData.ly = t.clientY;
                     }
                     if (t.identifier === tData.moveId) {
-                        let r = joy.getBoundingClientRect(), dx = t.clientX-(r.left+60), dy = t.clientY-(r.top+60);
-                        let d = Math.min(Math.sqrt(dx*dx+dy*dy), 50), a = Math.atan2(dy, dx);
+                        let r = joy.getBoundingClientRect(), dx = t.clientX-(r.left+70), dy = t.clientY-(r.top+70);
+                        let d = Math.min(Math.sqrt(dx*dx+dy*dy), 60), a = Math.atan2(dy, dx);
                         knob.style.transform = `translate(${Math.cos(a)*d}px, ${Math.sin(a)*d}px)`;
-                        move.f = -Math.sin(a)*(d/50); move.r = Math.cos(a)*(d/50);
+                        move.f = -Math.sin(a)*(d/60); move.r = Math.cos(a)*(d/60);
                     }
                 }
             };
             window.ontouchend = e => {
                 for(let t of e.changedTouches) {
                     if (t.identifier === tData.lookId) tData.lookId = null;
-                    if (t.identifier === tData.moveId) { tData.moveId = null; move.f = 0; move.r = 0; knob.style.transform = `translate(0,0)`; }
+                    if (t.identifier === tData.moveId) { 
+                        tData.moveId = null; move.f = 0; move.r = 0; knob.style.transform = `translate(0,0)`; 
+                    }
                 }
             };
             document.getElementById('shoot-btn').ontouchstart = e => { e.preventDefault(); shoot(); };
-            document.getElementById('jump-btn').ontouchstart = e => { e.preventDefault(); if(jumps < 2) { velY = 0.28; jumps++; } };
+            document.getElementById('jump-btn').ontouchstart = e => { e.preventDefault(); if(jumps < 2) { velY = 0.3; jumps++; } };
         }
 
         function shoot() {
-            if (reloading || ammo <= 0) { if(ammo <= 0) doReload(); return; }
-            ammo--; document.getElementById('am').innerText = ammo + "/15";
+            if (reloading || ammo <= 0) { if(ammo <= 0) reload(); return; }
+            ammo--; document.getElementById('am').innerText = ammo + "/20";
             
-            // Recoil Animation
-            document.querySelectorAll('.ch-line').forEach(l => l.classList.add('recoil'));
-            gun.position.z = 0.2;
-            setTimeout(() => {
-                document.querySelectorAll('.ch-line').forEach(l => l.classList.remove('recoil'));
-                gun.position.z = 0;
-            }, 100);
-
-            const b = new THREE.Mesh(new THREE.SphereGeometry(0.1), new THREE.MeshBasicMaterial({color: 0xffff00}));
+            const b = new THREE.Mesh(new THREE.SphereGeometry(0.15), new THREE.MeshBasicMaterial({color: 0x00ff00}));
             b.position.copy(camera.position);
             const dir = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
-            b.userData.v = dir.multiplyScalar(2);
+            b.userData.v = dir.multiplyScalar(2.5);
             scene.add(b); bullets.push(b);
+            
+            // Recoil
+            gun.position.y += 0.1;
+            setTimeout(() => gun.position.y -= 0.1, 50);
         }
 
-        function doReload() {
+        function reload() {
             reloading = true;
-            document.getElementById('am').innerText = "SNEEZING...";
-            setTimeout(() => {
-                ammo = 15; reloading = false;
-                document.getElementById('am').innerText = "15/15";
-            }, 1500);
+            document.getElementById('am').innerText = "SNOT RELOADING...";
+            setTimeout(() => { ammo = 20; reloading = false; document.getElementById('am').innerText = "20/20"; }, 1000);
         }
 
         function animate() {
             requestAnimationFrame(animate);
-            const delta = clock.getDelta();
             const time = performance.now() * 0.001;
 
-            // Rotation
+            // Camera Rotation
             look.lat = Math.max(-85, Math.min(85, look.lat));
             camera.rotation.order = 'YXZ';
             camera.rotation.y = THREE.MathUtils.degToRad(look.lon);
@@ -261,42 +274,35 @@
 
             // Movement
             let moveDir = new THREE.Vector3(move.r, 0, -move.f).applyQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0), camera.rotation.y));
-            camera.position.add(moveDir.multiplyScalar(0.2));
+            camera.position.add(moveDir.multiplyScalar(0.25));
 
-            // Gravity & Collision
+            // Gravity & Safety Collision
             velY -= 0.015;
             camera.position.y += velY;
             
-            let onPlatform = false;
             platforms.forEach(p => {
-                if (Math.abs(camera.position.x - p.position.x) < 3.5 && 
-                    Math.abs(camera.position.z - p.position.z) < 3.5 && 
-                    camera.position.y > p.position.y + 1.5 && camera.position.y < p.position.y + 2.5) {
-                    camera.position.y = p.position.y + 1.7;
+                let dx = Math.abs(camera.position.x - p.position.x);
+                let dz = Math.abs(camera.position.z - p.position.z);
+                // Safe padding (radius of 4.5 for 8x8 platforms)
+                if (dx < 4.5 && dz < 4.5 && camera.position.y > p.position.y + 1 && camera.position.y < p.position.y + 3) {
+                    camera.position.y = p.position.y + 2;
                     velY = 0; jumps = 0;
-                    onPlatform = true;
                 }
             });
 
-            if (camera.position.y < -20) { // Fell off
-                hp -= 20;
-                camera.position.set(0, 5, 0);
-                velY = 0;
-                updateHP();
+            if (camera.position.y < -30) { 
+                hp -= 25; updateHUD(); 
+                camera.position.set(0, 10, 0); velY = 0; 
             }
 
-            // AI Behavior (Boobastas chase player)
+            // Enemies (Chase Logic)
             enemies.forEach(e => {
                 let dist = e.position.distanceTo(camera.position);
-                if(dist < 15) {
+                if(dist < 20) {
                     e.lookAt(camera.position.x, e.position.y, camera.position.z);
                     let dir = new THREE.Vector3().subVectors(camera.position, e.position).normalize();
-                    e.position.add(dir.multiplyScalar(0.05));
-                    
-                    if(dist < 2) { // Damage Vulvian
-                        hp -= 0.5;
-                        updateHP();
-                    }
+                    e.position.add(dir.multiplyScalar(e.userData.speed));
+                    if(dist < 1.8) { hp -= 0.2; updateHUD(); }
                 }
             });
 
@@ -304,40 +310,36 @@
             for(let i=bullets.length-1; i>=0; i--) {
                 bullets[i].position.add(bullets[i].userData.v);
                 enemies.forEach((e, j) => {
-                    if(bullets[i] && bullets[i].position.distanceTo(e.position) < 1.5) {
-                        scene.remove(e); enemies.splice(j, 1);
+                    if(bullets[i] && bullets[i].position.distanceTo(e.position) < 2) {
+                        e.userData.hp--;
                         scene.remove(bullets[i]); bullets.splice(i,1);
+                        if(e.userData.hp <= 0) { scene.remove(e); enemies.splice(j, 1); }
                     }
                 });
-                if(bullets[i] && bullets[i].position.length() > 200) { scene.remove(bullets[i]); bullets.splice(i,1); }
             }
 
-            // Check Win Condition (Reach Boobi Doodi)
-            if(camera.position.distanceTo(targetGoal) < 3) {
+            // Win Trigger
+            if(!goalReached && boobiDoodi && camera.position.distanceTo(boobiDoodi.position) < 4) {
                 victory();
             }
-
-            // Earthquake effect (RagorGaming style)
-            camera.position.x += Math.sin(time * 50) * 0.01;
 
             renderer.render(scene, camera);
         }
 
-        function updateHP() {
+        function updateHUD() {
             document.getElementById('hp-fill').style.width = hp + "%";
-            if(hp <= 0) location.reload(); // Rage quit / Restart
+            if(hp <= 0) { alert("emotional damage! Dr. RagorGaming is disappointed."); location.reload(); }
         }
 
         function victory() {
-            const over = document.getElementById('msg-overlay');
-            over.style.display = 'block';
-            over.innerText = "THX BRO. DAB!";
+            goalReached = true;
+            level++;
+            const pop = document.getElementById('level-popup');
+            pop.style.display = 'block';
             setTimeout(() => {
-                over.style.display = 'none';
-                level++;
-                setupLevel(level);
-            }, 3000);
-            targetGoal = new THREE.Vector3(999,999,999); // Reset target
+                pop.style.display = 'none';
+                buildLevel();
+            }, 2000);
         }
     </script>
 </body>
