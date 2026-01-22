@@ -1,44 +1,43 @@
 // =========================
-// DabbaDoo Prototype - Blocky FPS
+// DabbaDoo Fixed Prototype
 // =========================
 
 let scene, camera, renderer, controls;
 let bullets = [];
 let enemies = [];
 let haloParticles = [];
+let platforms = [];
 let clock = new THREE.Clock();
-let player = {};
+let player = { speed: 0.1 };
+
+// Movement tracking
+const keys = {};
 
 init();
 animate();
 
 function init() {
-    // Scene
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x111111);
 
-    // Camera
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.y = 1.6;
+    // Note: Do NOT set camera.position.y here if using PointerLockControls inside a group
+    scene.add(camera); 
 
-    // Renderer
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // Controls
     controls = new THREE.PointerLockControls(camera, document.body);
-    document.body.addEventListener('click', () => controls.lock());
+    document.body.addEventListener('click', () => {
+        if (!controls.isLocked) controls.lock();
+    });
 
-    // Lighting
     const light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(5, 10, 7);
     scene.add(light);
+    scene.add(new THREE.AmbientLight(0x555555));
 
-    const ambient = new THREE.AmbientLight(0x555555);
-    scene.add(ambient);
-
-    // Floor
     const floor = new THREE.Mesh(
         new THREE.PlaneGeometry(100, 100),
         new THREE.MeshStandardMaterial({ color: 0x222222 })
@@ -46,158 +45,207 @@ function init() {
     floor.rotation.x = -Math.PI / 2;
     scene.add(floor);
 
-    // Neon Platforms
     createPlatforms();
-
-    // Player Vulvian Hands + Gun
     createPlayerHands();
-
-    // Boobasta Enemies
     spawnEnemies(5);
-
-    // Boobi Doodi NPC
     createBoobiDoodi();
 
-    // Event Listeners
     window.addEventListener('resize', onWindowResize);
-    window.addEventListener('click', shoot);
-    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('mousedown', shoot); // Use mousedown for better feel
+    window.addEventListener('keydown', (e) => { keys[e.code] = true; onKeyDown(e); });
+    window.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
-    // ======= FIX: Hide loading text when scene is ready =======
     const loadingText = document.getElementById("loading");
     if (loadingText) loadingText.style.display = "none";
 }
 
-// =========================
-// PLAYER FUNCTIONS
-// =========================
 function createPlayerHands() {
-    player.hands = new THREE.Group();
+    const handsGroup = new THREE.Group();
 
-    // Left Arm
-    const lArm = new THREE.Mesh(
-        new THREE.BoxGeometry(0.2, 0.6, 0.2),
-        new THREE.MeshStandardMaterial({ color: 0xffffff })
-    );
-    lArm.position.set(-0.25, -0.3, -0.5);
-    player.hands.add(lArm);
+    const mat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+    const lArm = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.4, 0.2), mat);
+    lArm.position.set(-0.4, -0.3, -0.5);
+    
+    const rArm = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.4, 0.2), mat);
+    rArm.position.set(0.4, -0.3, -0.5);
 
-    // Right Arm + Gun
-    const rArm = new THREE.Mesh(
-        new THREE.BoxGeometry(0.2, 0.6, 0.2),
-        new THREE.MeshStandardMaterial({ color: 0xffffff })
-    );
-    rArm.position.set(0.25, -0.3, -0.5);
-    player.hands.add(rArm);
-
-    // Gun
     const gun = new THREE.Mesh(
-        new THREE.BoxGeometry(0.1, 0.1, 1),
-        new THREE.MeshStandardMaterial({ color: 0x000000 })
+        new THREE.BoxGeometry(0.15, 0.15, 0.7),
+        new THREE.MeshStandardMaterial({ color: 0x222222 })
     );
-    gun.position.set(0.25, -0.2, -1.0);
-    player.hands.add(gun);
+    gun.position.set(0.4, -0.2, -0.8);
 
-    camera.add(player.hands);
+    handsGroup.add(lArm, rArm, gun);
+    camera.add(handsGroup); // Attach hands to camera so they move with view
 }
 
-// =========================
-// BULLETS
-// =========================
 function shoot() {
+    if (!controls.isLocked) return;
+
     const bullet = new THREE.Mesh(
-        new THREE.SphereGeometry(0.05, 6, 6),
-        new THREE.MeshBasicMaterial({ color: 0xff0000 })
+        new THREE.SphereGeometry(0.1, 8, 8),
+        new THREE.MeshBasicMaterial({ color: 0x00ff00, emissive: 0x00ff00 })
     );
+    
+    // Start bullet at camera position
     bullet.position.copy(camera.position);
-    bullet.velocity = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion).multiplyScalar(1.2);
+    
+    // Get direction from camera
+    const direction = new THREE.Vector3();
+    camera.getWorldDirection(direction);
+    bullet.velocity = direction.clone().multiplyScalar(1.5);
+
     scene.add(bullet);
     bullets.push(bullet);
 }
 
-// =========================
-// ENEMIES
-// =========================
 function spawnEnemies(count) {
     for (let i = 0; i < count; i++) {
         const enemy = new THREE.Group();
-
-        // Head
-        const head = new THREE.Mesh(
-            new THREE.BoxGeometry(0.6, 0.6, 0.6),
-            new THREE.MeshStandardMaterial({ color: 0x888888 })
-        );
-        head.position.y = 1.1;
-        enemy.add(head);
-
-        // Body
-        const body = new THREE.Mesh(
-            new THREE.BoxGeometry(0.8, 1, 0.4),
-            new THREE.MeshStandardMaterial({ color: 0x888888 })
-        );
+        const mat = new THREE.MeshStandardMaterial({ color: 0x888888 });
+        
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), mat);
+        head.position.y = 1.2;
+        const body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1, 0.4), mat);
         body.position.y = 0.5;
-        enemy.add(body);
 
-        // Arms
-        const lArm = new THREE.Mesh(
-            new THREE.BoxGeometry(0.2, 0.8, 0.2),
-            new THREE.MeshStandardMaterial({ color: 0x888888 })
-        );
-        lArm.position.set(-0.6, 0.7, 0);
-        enemy.add(lArm);
-
-        const rArm = new THREE.Mesh(
-            new THREE.BoxGeometry(0.2, 0.8, 0.2),
-            new THREE.MeshStandardMaterial({ color: 0x888888 })
-        );
-        rArm.position.set(0.6, 0.7, 0);
-        enemy.add(rArm);
-
-        // Position
-        enemy.position.set(Math.random() * 20 - 10, 0, -Math.random() * 20 - 10);
-
+        enemy.add(head, body);
+        enemy.position.set(Math.random() * 40 - 20, 0, -Math.random() * 40 - 10);
+        
         scene.add(enemy);
         enemies.push(enemy);
     }
 }
 
-// =========================
-// BOOBI DOODI NPC
-// =========================
 function createBoobiDoodi() {
     const bobi = new THREE.Group();
-
-    // Head
-    const head = new THREE.Mesh(
-        new THREE.BoxGeometry(0.5, 0.5, 0.5),
-        new THREE.MeshStandardMaterial({ color: 0xA0522D }) // brown
-    );
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), new THREE.MeshStandardMaterial({ color: 0xA0522D }));
     head.position.y = 1;
-    bobi.add(head);
-
-    // Torso
-    const torso = new THREE.Mesh(
-        new THREE.BoxGeometry(0.6, 0.8, 0.3),
-        new THREE.MeshStandardMaterial({ color: 0x0000FF }) // blue jacket
-    );
+    const torso = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.3), new THREE.MeshStandardMaterial({ color: 0x0000FF }));
     torso.position.y = 0.4;
-    bobi.add(torso);
-
-    bobi.position.set(0, 0, -25);
+    bobi.add(head, torso);
+    bobi.position.set(0, 0, -15);
     scene.add(bobi);
-
-    player.bobi = bobi;
 }
 
-// =========================
-// NEON PLATFORMS
-// =========================
-let platforms = [];
 function createPlatforms() {
     for (let i = 0; i < 10; i++) {
         const plat = new THREE.Mesh(
-            new THREE.BoxGeometry(3, 0.2, 3),
-            new THREE.MeshStandardMaterial({ color: Math.random() > 0.5 ? 0xff0000 : 0x00ff00 })
+            new THREE.BoxGeometry(4, 0.5, 4),
+            new THREE.MeshStandardMaterial({ color: Math.random() > 0.5 ? 0x00ffff : 0xff00ff })
         );
-        plat.position.set(Math.random() * 20 - 10, Math.random() * 2, -i * 5);
+        plat.position.set(Math.random() * 30 - 15, Math.random() * 3, -i * 8);
         scene.add(plat);
+        platforms.push(plat);
+    }
+}
+
+function onKeyDown(event) {
+    if (event.code === 'Space' && controls.isLocked) {
+        camera.position.y += 1.5; 
+        // Simple particle
+        const halo = new THREE.Mesh(
+            new THREE.RingGeometry(0.3, 0.5, 32),
+            new THREE.MeshBasicMaterial({ color: 0xffff00, side: THREE.DoubleSide, transparent: true })
+        );
+        halo.position.copy(camera.position);
+        halo.rotation.x = Math.PI/2;
+        scene.add(halo);
+        haloParticles.push(halo);
+    }
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    const delta = clock.getDelta();
+
+    if (controls.isLocked) {
+        // WASD Movement
+        const speed = player.speed;
+        if (keys['KeyW']) controls.moveForward(speed);
+        if (keys['KeyS']) controls.moveForward(-speed);
+        if (keys['KeyA']) controls.moveRight(-speed);
+        if (keys['KeyD']) controls.moveRight(speed);
+        
+        // Gravity "Lite"
+        if (camera.position.y > 1.6) camera.position.y -= 0.05;
+    }
+
+    // Enemies track player
+    enemies.forEach(e => {
+        const dir = new THREE.Vector3().subVectors(camera.position, e.position);
+        dir.y = 0; // Keep them on ground
+        e.position.add(dir.normalize().multiplyScalar(0.03));
+        e.lookAt(camera.position.x, 0, camera.position.z);
+    });
+
+    // Update Bullets (safe removal)
+    for (let i = bullets.length - 1; i >= 0; i--) {
+        const b = bullets[i];
+        b.position.add(b.velocity);
+
+        if (b.position.distanceTo(camera.position) > 50) {
+            scene.remove(b);
+            bullets.splice(i, 1);
+            continue;
+        }
+
+        for (let j = enemies.length - 1; j >= 0; j--) {
+            if (b.position.distanceTo(enemies[j].position) < 1.2) {
+                explodeEnemy(enemies[j].position);
+                scene.remove(enemies[j]);
+                enemies.splice(j, 1);
+                scene.remove(b);
+                bullets.splice(i, 1);
+                break;
+            }
+        }
+    }
+
+    // Halo Fade
+    for (let i = haloParticles.length - 1; i >= 0; i--) {
+        const h = haloParticles[i];
+        h.material.opacity -= 0.05;
+        h.scale.multiplyScalar(1.05);
+        if (h.material.opacity <= 0) {
+            scene.remove(h);
+            haloParticles.splice(i, 1);
+        }
+    }
+
+    platforms.forEach((p, idx) => {
+        p.position.y += Math.sin(Date.now() * 0.002 + idx) * 0.005;
+    });
+
+    renderer.render(scene, camera);
+}
+
+function explodeEnemy(pos) {
+    for (let i = 0; i < 8; i++) {
+        const cube = new THREE.Mesh(
+            new THREE.BoxGeometry(0.2, 0.2, 0.2),
+            new THREE.MeshStandardMaterial({ color: 0xff0000 })
+        );
+        cube.position.copy(pos);
+        const vel = new THREE.Vector3((Math.random()-0.5), Math.random(), (Math.random()-0.5));
+        scene.add(cube);
+        
+        let life = 0;
+        const partInterval = setInterval(() => {
+            cube.position.add(vel.clone().multiplyScalar(0.1));
+            vel.y -= 0.02; // Gravity on debris
+            life++;
+            if(life > 20) {
+                scene.remove(cube);
+                clearInterval(partInterval);
+            }
+        }, 16);
+    }
+    }
+                                            
