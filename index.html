@@ -3,172 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DABBADOO: ALPHA NEON</title>
+    <title>DABBADOO: OMEGA PROTOCOL</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap');
-        body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Black Ops One', cursive; }
-        #lock { position: fixed; inset: 0; background: #000; color: #0f0; z-index: 1000; display: none; align-items: center; justify-content: center; text-align: center; border: 5px solid #0f0; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap');
+        body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Orbitron', sans-serif; }
+        
+        #lock { position: fixed; inset: 0; background: #000; color: #f0f; z-index: 1000; display: none; align-items: center; justify-content: center; text-align: center; border: 10px double #f0f; }
         @media (orientation: portrait) { #lock { display: flex; } }
-        #hud { position: absolute; top: 20px; left: 20px; z-index: 10; pointer-events: none; color: #0f0; }
-        #hp-bg { width: 180px; height: 10px; background: #200; border: 2px solid #fff; margin-top: 5px; }
-        #hp-val { width: 100%; height: 100%; background: #f00; box-shadow: 0 0 10px #f00; }
-        .btn { position: absolute; z-index: 20; border-radius: 50%; border: 3px solid #fff; color: #fff; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); box-shadow: 0 0 15px rgba(255,255,255,0.2); }
-        #jump-btn { bottom: 130px; right: 40px; width: 85px; height: 85px; background: #60f; font-size: 18px; }
-        #shoot-btn { bottom: 20px; right: 30px; width: 115px; height: 115px; background: #f04; font-size: 22px; border-color: #ff0; }
-        #joy-base { position: absolute; bottom: 35px; left: 35px; width: 130px; height: 130px; border: 2px solid #0ff; border-radius: 50%; background: rgba(0,255,255,0.1); }
-        #joy-knob { position: absolute; top: 40px; left: 40px; width: 50px; height: 50px; background: #0ff; border-radius: 50%; box-shadow: 0 0 20px #0ff; }
-        #win { position: fixed; inset: 0; background: rgba(0,0,0,0.9); color: #fff; display: none; align-items: center; justify-content: center; flex-direction: column; z-index: 500; font-size: 60px; text-shadow: 0 0 20px #0f0; }
+
+        /* HUD 2.0 */
+        #hud { position: absolute; top: 20px; left: 20px; z-index: 10; pointer-events: none; }
+        .label { color: #0ff; font-size: 12px; letter-spacing: 2px; }
+        .val { color: #fff; font-size: 28px; text-shadow: 0 0 10px #0ff; margin-bottom: 10px; }
+        #hp-frame { width: 220px; height: 15px; background: rgba(0,0,0,0.8); border: 2px solid #f0f; position: relative; }
+        #hp-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #f0f, #ff0044); transition: 0.2s; box-shadow: 0 0 15px #f0f; }
+
+        /* Tactical Controls */
+        .ctrl { position: absolute; z-index: 20; border-radius: 15px; border: 2px solid #fff; color: #fff; display: flex; align-items: center; justify-content: center; background: rgba(10,10,30,0.7); backdrop-filter: blur(5px); }
+        #jump-btn { bottom: 130px; right: 30px; width: 90px; height: 90px; border-color: #0ff; color: #0ff; font-size: 16px; }
+        #fire-btn { bottom: 20px; right: 20px; width: 120px; height: 120px; border-color: #f0f; font-size: 24px; text-shadow: 0 0 10px #f0f; }
+        
+        #joy-base { position: absolute; bottom: 30px; left: 30px; width: 140px; height: 140px; border: 2px solid #0ff; border-radius: 50%; background: radial-gradient(circle, rgba(0,255,255,0.1) 0%, transparent 70%); }
+        #joy-knob { position: absolute; top: 45px; left: 45px; width: 50px; height: 50px; background: #0ff; border-radius: 50%; box-shadow: 0 0 20px #0ff; }
+
+        #overlay { position: fixed; inset: 0; background: rgba(0,255,255,0.2); display: none; align-items: center; justify-content: center; z-index: 500; font-size: 80px; color: #fff; text-shadow: 0 0 30px #000; pointer-events: none; }
     </style>
 </head>
 <body>
-    <div id="lock"><h1>ROTATE SCREEN ALPHA</h1></div>
-    <div id="win"><h1>THX BRO!</h1><p style="font-size: 20px;">VULVIAN LEVEL UP</p></div>
-    <div id="hud">V-LVL: <span id="vlvl">1</span><div id="hp-bg"><div id="hp-val"></div></div></div>
+    <div id="lock"><h1>ENABLE LANDSCAPE<br>TO GRIND</h1></div>
+    <div id="overlay">THX BRO!</div>
+    
+    <div id="hud">
+        <div class="label">ALPHA STATUS</div>
+        <div class="val">LVL <span id="vlvl">1</span></div>
+        <div id="hp-frame"><div id="hp-fill"></div></div>
+    </div>
+
     <div id="joy-base"><div id="joy-knob"></div></div>
-    <div id="jump-btn" class="btn">JUMP</div>
-    <div id="shoot-btn" class="btn">SNOT</div>
+    <div id="jump-btn" class="ctrl">BOOST</div>
+    <div id="fire-btn" class="ctrl">GRIND</div>
 
     <script src="https://unpkg.com/three@0.155.0/build/three.min.js"></script>
     <script>
-        let scene, camera, renderer, gun, clock;
+        let scene, camera, renderer, gun, clock, raycaster;
         let platforms = [], enemies = [], bullets = [];
-        let vLvl = 1, hp = 100, isPlaying = true, jumps = 0, velY = 0;
-        let move = { x: 0, y: 0 }, look = { x: 0, y: 0 }, touches = { move: null, look: null, lx: 0, ly: 0 };
-        let boobi, cage, groundCheck = 0;
+        let vLvl = 1, hp = 100, active = true, velY = 0, jumps = 0;
+        let move = {x:0, y:0}, look = {x:0, y:0}, tData = {m:null, l:null, lx:0, ly:0};
+        let boobi, cage, lava;
 
         init(); animate();
 
         function init() {
             scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2(0x000, 0.02);
+            scene.fog = new THREE.FogExp2(0x0a001a, 0.015);
             camera = new THREE.PerspectiveCamera(85, window.innerWidth/window.innerHeight, 0.1, 1000);
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
             document.body.appendChild(renderer.domElement);
-
-            const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-            const pLight = new THREE.PointLight(0x0f0, 2, 50);
-            scene.add(ambient, pLight);
-
-            // ARM
-            gun = new THREE.Group();
-            const arm = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.25, 0.8), new THREE.MeshStandardMaterial({color: 0x111}));
-            const neon = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.9), new THREE.MeshStandardMaterial({color: 0x0f0, emissive: 0x0f0}));
-            arm.position.set(0.5, -0.4, -0.6); neon.position.set(0.5, -0.35, -0.6);
-            gun.add(arm, neon); camera.add(gun); scene.add(camera);
-
-            build();
             
+            raycaster = new THREE.Raycaster();
+
+            const ambient = new THREE.AmbientLight(0x4040ff, 0.5);
+            const spot = new THREE.SpotLight(0xffffff, 1);
+            spot.position.set(0, 50, 0);
+            scene.add(ambient, spot);
+
+            // ARM PROTOCOL
+            gun = new THREE.Group();
+            const arm = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 1), new THREE.MeshStandardMaterial({color: 0x000}));
+            const core = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.1), new THREE.MeshBasicMaterial({color: 0x0ff}));
+            core.rotation.x = Math.PI/2;
+            gun.add(arm, core); camera.add(gun); gun.position.set(0.5, -0.4, -0.5); scene.add(camera);
+
+            // LAVA FLOOR
+            lava = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), new THREE.MeshBasicMaterial({color: 0xff0044, transparent: true, opacity: 0.3}));
+            lava.rotation.x = -Math.PI/2; lava.position.y = -40; scene.add(lava);
+
+            build(); setupTouch();
+        }
+
+        function build() {
+            platforms.forEach(p=>scene.remove(p)); enemies.forEach(e=>scene.remove(e));
+            if(cage) scene.remove(cage); if(boobi) scene.remove(boobi);
+            platforms = []; enemies = []; camera.position.set(0, 5, 0); active = true;
+
+            addPlat(0, 0, 0, 25, 25, 0x111111); // Safe Start
+            let z = -20, y = 0;
+            for(let i=0; i<8+vLvl; i++) {
+                let x = (Math.random()-0.5)*18;
+                y += (Math.random()-0.3)*4; z -= 18;
+                addPlat(x, y, z, 12-vLvl, 12-vLvl, 0x0033ff);
+                if(i % 2 === 1) spawnMob(x, y+3, z);
+            }
+            addPlat(0, y, z-25, 20, 20, 0x00ffcc);
+            spawnGoal(0, y+2, z-25);
+        }
+
+        function addPlat(x, y, z, w, d, col) {
+            const p = new THREE.Mesh(new THREE.BoxGeometry(w, 2, d), new THREE.MeshStandardMaterial({color: col, emissive: col, emissiveIntensity: 0.3}));
+            p.position.set(x, y, z); scene.add(p); platforms.push(p);
+        }
+
+        function spawnMob(x, y, z) {
+            const m = new THREE.Mesh(new THREE.OctahedronGeometry(1.5), new THREE.MeshStandardMaterial({color: 0xff00ff, wireframe: true}));
+            m.position.set(x, y, z); m.userData = { hp: 2, s: 0.06+(vLvl*0.01) };
+            scene.add(m); enemies.push(m);
+        }
+
+        function spawnGoal(x, y, z) {
+            cage = new THREE.Mesh(new THREE.BoxGeometry(6, 8, 6), new THREE.MeshStandardMaterial({color: 0x0ff, wireframe: true}));
+            cage.position.set(x, y+2, z);
+            boobi = new THREE.Mesh(new THREE.SphereGeometry(1.5), new THREE.MeshPhongMaterial({color: 0xff0000, emissive: 0xff0000}));
+            scene.add(cage, boobi); boobi.position.copy(cage.position);
+        }
+
+        function setupTouch() {
             const joy = document.getElementById('joy-base'), knob = document.getElementById('joy-knob');
             window.addEventListener('touchstart', e => {
                 for(let t of e.changedTouches) {
                     let r = joy.getBoundingClientRect();
-                    if(t.clientX > r.left && t.clientX < r.right && t.clientY > r.top && t.clientY < r.bottom) touches.move = t.identifier;
-                    else if(!touches.look) { touches.look = t.identifier; touches.lx = t.clientX; touches.ly = t.clientY; }
+                    if(t.clientX > r.left && t.clientX < r.right && t.clientY > r.top && t.clientY < r.bottom) tData.m = t.identifier;
+                    else if(!tData.l) { tData.l = t.identifier; tData.lx = t.clientX; tData.ly = t.clientY; }
                 }
             });
             window.addEventListener('touchmove', e => {
                 for(let t of e.changedTouches) {
-                    if(t.identifier === touches.move) {
-                        let r = joy.getBoundingClientRect(), dx = t.clientX-(r.left+65), dy = t.clientY-(r.top+65);
-                        let d = Math.min(Math.sqrt(dx*dx+dy*dy), 55), a = Math.atan2(dy, dx);
+                    if(t.identifier === tData.m) {
+                        let r = joy.getBoundingClientRect(), dx = t.clientX-(r.left+70), dy = t.clientY-(r.top+70);
+                        let d = Math.min(Math.sqrt(dx*dx+dy*dy), 60), a = Math.atan2(dy, dx);
                         knob.style.transform = `translate(${Math.cos(a)*d}px, ${Math.sin(a)*d}px)`;
-                        move.x = Math.cos(a)*(d/55); move.y = -Math.sin(a)*(d/55);
+                        move.x = Math.cos(a)*(d/60); move.y = -Math.sin(a)*(d/60);
                     }
-                    if(t.identifier === touches.look) {
-                        look.x -= (t.clientX - touches.lx) * 0.3; look.y -= (t.clientY - touches.ly) * 0.3;
-                        touches.lx = t.clientX; touches.ly = t.clientY;
+                    if(t.identifier === tData.l) {
+                        look.x -= (t.clientX - tData.lx) * 0.35; look.y -= (t.clientY - tData.ly) * 0.35;
+                        tData.lx = t.clientX; tData.ly = t.clientY;
                     }
                 }
             });
             window.addEventListener('touchend', e => {
                 for(let t of e.changedTouches) {
-                    if(t.identifier === touches.move) { touches.move=null; move.x=0; move.y=0; knob.style.transform='none'; }
-                    if(t.identifier === touches.look) touches.look=null;
+                    if(t.identifier === tData.m) { tData.m=null; move.x=0; move.y=0; knob.style.transform='none'; }
+                    if(t.identifier === tData.l) tData.l=null;
                 }
             });
             document.getElementById('jump-btn').ontouchstart = (e) => { 
                 e.preventDefault();
-                if(groundCheck > 0 || jumps < 2) { velY = 0.36; jumps++; groundCheck = 0; }
+                // RAYCAST GROUND CHECK
+                raycaster.set(camera.position, new THREE.Vector3(0,-1,0));
+                const hits = raycaster.intersectObjects(platforms);
+                if(hits.length > 0 && hits[0].distance < 2.5) { velY = 0.4; jumps = 1; }
+                else if(jumps < 2) { velY = 0.3; jumps++; } // Air Jump/Dash
             };
-            document.getElementById('shoot-btn').ontouchstart = (e) => { e.preventDefault(); fire(); };
-        }
-
-        function build() {
-            platforms.forEach(p => scene.remove(p)); enemies.forEach(e => scene.remove(e));
-            if(cage) scene.remove(cage); if(boobi) scene.remove(boobi);
-            platforms = []; enemies = []; isPlaying = true; camera.position.set(0, 5, 0);
-            
-            addBox(0, 0, 0, 20, 20, 0x222222); // Start
-            let z = -18, y = 0;
-            for(let i=0; i < 6+vLvl; i++) {
-                let x = (Math.random()-0.5)*15, size = 10 - (vLvl*0.2);
-                y += (Math.random()-0.3)*3.5; z -= 16;
-                addBox(x, y, z, size, size, 0x0055ff);
-                if(i % 2 === 1) spawnMob(x, y+3, z);
-            }
-            addBox(0, y, z-20, 15, 15, 0xff0055);
-            spawnRescue(0, y+2, z-20);
-        }
-
-        function addBox(x, y, z, w, d, col) {
-            const b = new THREE.Mesh(new THREE.BoxGeometry(w, 2, d), new THREE.MeshStandardMaterial({color: col, emissive: col, emissiveIntensity: 0.2}));
-            b.position.set(x, y, z);
-            b.userData.b = { x: w/2 + 0.7, z: d/2 + 0.7, y: y+1.1 };
-            scene.add(b); platforms.push(b);
-        }
-
-        function spawnMob(x, y, z) {
-            const m = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshStandardMaterial({color: 0xff4400, emissive: 0xff0000}));
-            m.position.set(x, y, z); m.userData = { hp: 1+vLvl, s: 0.05+(vLvl*0.01) };
-            scene.add(m); enemies.push(m);
-        }
-
-        function spawnRescue(x, y, z) {
-            cage = new THREE.Mesh(new THREE.BoxGeometry(5, 6, 5), new THREE.MeshStandardMaterial({color: 0xffffff, wireframe: true}));
-            cage.position.set(x, y+2, z);
-            boobi = new THREE.Mesh(new THREE.SphereGeometry(1.2), new THREE.MeshStandardMaterial({color: 0xff0000, emissive: 0xff0000}));
-            boobi.position.copy(cage.position); scene.add(cage, boobi);
+            document.getElementById('fire-btn').ontouchstart = (e) => { e.preventDefault(); fire(); };
         }
 
         function fire() {
-            const b = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.6), new THREE.MeshBasicMaterial({color: 0x0f0}));
-            b.rotation.x = Math.PI/2; b.position.copy(camera.position);
+            const b = new THREE.Mesh(new THREE.SphereGeometry(0.3), new THREE.MeshBasicMaterial({color: 0xff00ff}));
+            b.position.copy(camera.position);
             const d = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
-            b.lookAt(camera.position.clone().add(d));
-            b.userData.v = d.multiplyScalar(2.8); scene.add(b); bullets.push(b);
-            gun.position.z += 0.2; setTimeout(()=>gun.position.z=0, 50);
+            b.userData.v = d.multiplyScalar(3); scene.add(b); bullets.push(b);
+            gun.rotation.x = -0.2; setTimeout(()=>gun.rotation.x=0, 100);
         }
 
         function animate() {
-            requestAnimationFrame(animate); if(!isPlaying) return;
+            requestAnimationFrame(animate); if(!active) return;
             look.y = Math.max(-85, Math.min(85, look.y));
             camera.rotation.order = 'YXZ';
-            camera.rotation.y = THREE.MathUtils.degToRad(look.x); camera.rotation.x = THREE.MathUtils.degToRad(look.y);
-            
+            camera.rotation.y = THREE.MathUtils.degToRad(look.x); 
+            camera.rotation.x = THREE.MathUtils.degToRad(look.y);
+            // Camera Tilt
+            camera.rotation.z = THREE.MathUtils.lerp(camera.rotation.z, -move.x * 0.05, 0.1);
+
             let f = new THREE.Vector3(move.x, 0, -move.y).applyQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0), camera.rotation.y));
-            camera.position.add(f.multiplyScalar(0.28));
-            
-            velY -= 0.016; camera.position.y += velY;
-            groundCheck--; 
+            camera.position.add(f.multiplyScalar(0.32));
+
+            velY -= 0.018; camera.position.y += velY;
 
             platforms.forEach(p => {
-                const b = p.userData.b;
-                if(Math.abs(camera.position.x-p.position.x) < b.x && Math.abs(camera.position.z-p.position.z) < b.z) {
-                    if(camera.position.y > b.y && camera.position.y < b.y + 1.8) {
-                        camera.position.y = b.y + 0.9; velY = 0; jumps = 0; groundCheck = 10;
+                if(Math.abs(camera.position.x-p.position.x) < p.geometry.parameters.width/2+0.5 && 
+                   Math.abs(camera.position.z-p.position.z) < p.geometry.parameters.depth/2+0.5) {
+                    if(camera.position.y > p.position.y+1 && camera.position.y < p.position.y+2.5) {
+                        camera.position.y = p.position.y+2; velY = 0; jumps = 0;
                     }
                 }
             });
 
-            if(camera.position.y < -35) { hp -= 25; camera.position.set(0, 10, 0); updateHUD(); }
-            
+            if(camera.position.y < -35) { hp -= 2; updateHUD(); } // Lava Damage
+
             enemies.forEach(e => {
                 let d = e.position.distanceTo(camera.position);
-                if(d < 25) {
-                    e.lookAt(camera.position.x, e.position.y, camera.position.z);
+                if(d < 30) {
+                    e.lookAt(camera.position); e.rotation.y += Math.sin(Date.now()*0.01);
                     e.position.add(new THREE.Vector3().subVectors(camera.position, e.position).normalize().multiplyScalar(e.userData.s));
-                    if(d < 2.2) { hp -= 0.6; updateHUD(); }
+                    if(d < 2.5) { hp -= 0.8; updateHUD(); }
                 }
             });
 
@@ -176,28 +204,31 @@
                 b.position.add(b.userData.v);
                 enemies.forEach((e, j) => {
                     if(b.position.distanceTo(e.position) < 2) {
-                        scene.remove(e); enemies.splice(j,1); scene.remove(b); bullets.splice(i,1);
+                        e.userData.hp--; b.position.y -= 100;
+                        if(e.userData.hp <= 0) { scene.remove(e); enemies.splice(j,1); }
+                        else { e.material.color.set(0x00ffff); e.material.wireframe = false; }
                     }
                 });
             });
 
             if(boobi) {
-                boobi.rotation.y += 0.05;
-                if(camera.position.distanceTo(boobi.position) < 5) win();
+                boobi.position.y = cage.position.y + Math.sin(Date.now()*0.005)*0.5;
+                if(camera.position.distanceTo(boobi.position) < 6) win();
             }
             renderer.render(scene, camera);
         }
 
         function updateHUD() {
-            document.getElementById('hp-val').style.width = hp + "%";
-            if(hp <= 0) { alert("NO ALPHA DETECTED. RESTARTING."); location.reload(); }
+            document.getElementById('hp-fill').style.width = hp + "%";
+            if(hp <= 0) { alert("ALPHA DISCONNECTED. REBOOTING..."); location.reload(); }
         }
 
         function win() {
-            isPlaying = false; vLvl++; document.getElementById('vlvl').innerText = vLvl;
-            document.getElementById('win').style.display = 'flex';
-            setTimeout(() => { document.getElementById('win').style.display = 'none'; build(); }, 2000);
+            active = false; vLvl++; document.getElementById('vlvl').innerText = vLvl;
+            document.getElementById('overlay').style.display = 'flex';
+            setTimeout(() => { document.getElementById('overlay').style.display = 'none'; build(); hp = 100; updateHUD(); }, 2000);
         }
     </script>
 </body>
-</html>
+    </html>
+    
