@@ -7,47 +7,28 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap');
         body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Black Ops One', system-ui; }
-        
-        /* Orientation Force */
         #lock { position: fixed; inset: 0; background: #000; color: #f00; z-index: 1000; display: none; align-items: center; justify-content: center; text-align: center; border: 10px solid #f00; }
         @media (orientation: portrait) { #lock { display: flex; } }
-
-        /* HUD */
         #hud { position: absolute; top: 20px; left: 20px; z-index: 10; pointer-events: none; }
-        .stat { color: #0f0; font-size: 22px; text-shadow: 2px 2px 4px #000; margin-bottom: 5px; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 10px; }
-        #hp-bg { width: 200px; height: 12px; background: rgba(0,0,0,0.5); border: 2px solid #fff; border-radius: 6px; margin-top: 5px; }
-        #hp-val { width: 100%; height: 100%; background: #f00; border-radius: 4px; transition: 0.2s; }
-
-        /* Feedback System */
-        .feedback { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #0f0; font-size: 40px; text-shadow: 0 0 20px #0f0; opacity: 0; pointer-events: none; z-index: 100; }
-        
-        /* Buttons with Visual Feedback */
-        .btn { position: absolute; z-index: 20; border-radius: 50%; border: 3px solid #fff; color: #fff; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); font-size: 14px; transition: all 0.1s ease; user-select: none; }
-        .btn:active, .btn.active { transform: scale(0.95); opacity: 0.9; }
-        #jump-btn { bottom: 120px; right: 40px; width: 80px; height: 80px; background: #4400ff; box-shadow: 0 0 15px #4400ff; }
-        #shoot-btn { bottom: 20px; right: 30px; width: 110px; height: 110px; background: #ff0044; border-color: #ff0; font-size: 20px; box-shadow: 0 0 15px #ff0044; }
-
-        /* IMPROVED JOYSTICK */
-        #joy-base { position: absolute; bottom: 30px; left: 30px; width: 130px; height: 130px; background: rgba(0,255,255,0.1); border: 2px solid #0ff; border-radius: 50%; z-index: 20; }
-        #joy-knob { position: absolute; top: 40px; left: 40px; width: 50px; height: 50px; background: #0ff; border-radius: 50%; box-shadow: 0 0 15px #0ff; transition: transform 0.05s ease; }
-        #joy-base.active { background: rgba(0,255,255,0.2); border-color: #00ffff; }
-        #joy-knob.active { background: #00ffff; box-shadow: 0 0 20px #00ffff; }
-
+        .stat { color: #0f0; font-size: 22px; text-shadow: 2px 2px #000; margin-bottom: 5px; }
+        #hp-bg { width: 200px; height: 12px; background: rgba(0,0,0,0.5); border: 2px solid #fff; }
+        #hp-val { width: 100%; height: 100%; background: #f00; transition: 0.2s; }
+        .btn { position: absolute; z-index: 20; border-radius: 50%; border: 3px solid #fff; color: #fff; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); font-size: 14px; }
+        #jump-btn { bottom: 120px; right: 40px; width: 80px; height: 80px; background: #4400ff; }
+        #shoot-btn { bottom: 20px; right: 30px; width: 110px; height: 110px; background: #ff0044; border-color: #ff0; font-size: 20px; }
+        #joy-base { position: absolute; bottom: 30px; left: 30px; width: 130px; height: 130px; background: rgba(255,255,255,0.1); border: 2px solid #0ff; border-radius: 50%; z-index: 20; display: none; }
+        #joy-knob { position: absolute; top: 40px; left: 40px; width: 50px; height: 50px; background: #0ff; border-radius: 50%; box-shadow: 0 0 15px #0ff; }
         #win-screen { position: fixed; inset: 0; background: rgba(0,0,0,0.8); color: #fff; display: none; align-items: center; justify-content: center; flex-direction: column; z-index: 500; font-size: 50px; text-shadow: 0 0 20px #0f0; }
-        #win-screen h1 { color: #0ff; text-shadow: 0 0 30px #0ff; }
-        #win-screen p { font-size: 24px; color: #ff0; margin-top: 20px; }
-
-        /* Performance overlay */
-        #fps { position: absolute; top: 20px; right: 20px; color: #0f0; font-size: 16px; background: rgba(0,0,0,0.5); padding: 2px 8px; border-radius: 4px; display: none; }
+        #pc-hint { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); color: #0ff; font-size: 18px; z-index: 100; text-shadow: 0 0 10px #0ff; display: none; }
     </style>
 </head>
 <body>
     <div id="lock"><h1>ROTATE SCREEN BRO!<br>SIGMAS PLAY HORIZONTAL</h1></div>
-    <div id="win-screen"><h1>VULVIAN SAVED!</h1><p>LEVEL UP: <span id="new-lvl">2</span></p></div>
-    <div id="feedback" class="feedback">+1 HP</div>
-    <div id="fps"></div>
+    <div id="win-screen"><h1>THX BRO!</h1><p style="font-size: 20px;">VULVIAN LEVEL UP</p></div>
+    <div id="pc-hint">USE WASD/ARROWS + MOUSE + SPACE + F</div>
 
-    <div id="hud">        <div class="stat">VULVIAN LVL: <span id="vlvl">1</span></div>
+    <div id="hud">
+        <div class="stat">VULVIAN LVL: <span id="vlvl">1</span></div>
         <div id="hp-bg"><div id="hp-val"></div></div>
     </div>
 
@@ -55,721 +36,276 @@
     <div id="jump-btn" class="btn">JUMP</div>
     <div id="shoot-btn" class="btn">SNOT</div>
 
-    <script src="https://unpkg.com/three@0.165.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.155.0/build/three.min.js"></script>
     <script>
-        /** ENGINE INITIALIZATION **/
         let scene, camera, renderer, clock, gun;
-        let platforms = [], enemies = [], bullets = [], particles = [];
-        let vLvl = 1, hp = 100, maxHp = 100, isPlaying = true, jumps = 0, velY = 0;
+        let platforms = [], enemies = [], bullets = [];
+        let vLvl = 1, hp = 100, isPlaying = true, jumps = 0, velY = 0;
         let move = { x: 0, y: 0 }, look = { x: 0, y: 0 };
         let touches = { move: null, look: null, lx: 0, ly: 0 };
-        let boobi, cage;
-        let lastFrameTime = 0;
-        let frameCount = 0;
-        let fps = 0;
-        let showFps = false; // Set to true for debugging
-
-        // Performance optimization: Use instanced geometries where possible
-        const blockGeometry = new THREE.BoxGeometry(1, 2, 1);
-        const enemyGeometry = new THREE.BoxGeometry(2, 2, 2);
-        const bulletGeometry = new THREE.SphereGeometry(0.2, 8, 8);
+        let boobi, cage, isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        let keys = { w: false, a: false, s: false, d: false, space: false };
 
         init();
         animate();
-
         function createStarBox() {
             const canvas = document.createElement('canvas');
-            canvas.width = 256; canvas.height = 256; // Reduced size for better performance
+            canvas.width = 512; canvas.height = 512;
             const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#050010'; ctx.fillRect(0,0,256,256);
-            for(let i=0; i<100; i++) { // Reduced star count
-                ctx.fillStyle = i < 70 ? '#fff' : '#88f'; // Add some blue stars
-                ctx.fillRect(Math.random()*256, Math.random()*256, 1 + Math.random()*2, 1 + Math.random()*2);
-            }
+            ctx.fillStyle = '#050010'; ctx.fillRect(0,0,512,512);
+            for(let i=0; i<200; i++) ctx.fillRect(Math.random()*512, Math.random()*512, 2, 2);
             const tex = new THREE.CanvasTexture(canvas);
             tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-            tex.repeat.set(8, 8); // More repeats for better tiling
-            tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            tex.repeat.set(5, 5);
             return tex;
         }
 
         function init() {
             scene = new THREE.Scene();
             clock = new THREE.Clock();
-                        // Optimized FOV for mobile
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 800); // Reduced far plane
-            
-            renderer = new THREE.WebGLRenderer({ 
-                antialias: false, // Disabled for better mobile performance
-                alpha: true,
-                powerPreference: "high-performance"
-            });
+            camera = new THREE.PerspectiveCamera(90, window.innerWidth/window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Cap pixel ratio for mobile
-            renderer.setClearColor(0x000000, 0);
+            renderer.setPixelRatio(window.devicePixelRatio);
             document.body.appendChild(renderer.domElement);
 
-            // SKYBOX - Optimized
-            const skyGeo = new THREE.SphereGeometry(400, 16, 16); // Reduced segments
-            const skyMat = new THREE.MeshBasicMaterial({ 
-                map: createStarBox(), 
-                side: THREE.BackSide,
-                fog: false
-            });
-            const sky = new THREE.Mesh(skyGeo, skyMat);
-            scene.add(sky);
+            const skyGeo = new THREE.SphereGeometry(500, 32, 32);
+            const skyMat = new THREE.MeshBasicMaterial({ map: createStarBox(), side: THREE.BackSide });
+            scene.add(new THREE.Mesh(skyGeo, skyMat));
 
-            // Lighting optimization
-            const ambient = new THREE.AmbientLight(0x444444, 1); // Reduced intensity
-            const sun = new THREE.DirectionalLight(0x00ff00, 0.8); // Reduced intensity
+            const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+            const sun = new THREE.DirectionalLight(0x00ff00, 1);
             sun.position.set(5, 10, 5);
-            sun.castShadow = false; // Disabled shadows for mobile performance
             scene.add(ambient, sun);
 
-            // GUN - Simplified
             gun = new THREE.Group();
-            const gBody = new THREE.Mesh(
-                new THREE.BoxGeometry(0.2, 0.2, 0.7, 2, 2, 2), // Reduced segments
-                new THREE.MeshStandardMaterial({color: 0x222222, roughness: 0.8, metalness: 0.2})
-            );
-            const gMuzzle = new THREE.Mesh(
-                new THREE.CylinderGeometry(0.05, 0.1, 0.3, 8), // More efficient geometry
-                new THREE.MeshStandardMaterial({color: 0x00ff00, emissive: 0x00ff00, emissiveIntensity: 0.5})
-            );
-            gMuzzle.rotation.x = Math.PI/2;
-            gMuzzle.position.z = -0.5;
+            const gBody = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.7), new THREE.MeshStandardMaterial({color: 0x222222}));
+            const gMuzzle = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.2), new THREE.MeshStandardMaterial({color: 0x00ff00}));
+            gMuzzle.position.z = -0.4;
             gun.add(gBody, gMuzzle);
             gun.position.set(0.4, -0.3, -0.5);
             camera.add(gun);
             scene.add(camera);
 
+            document.getElementById('joy-base').style.display = isMobile ? 'block' : 'none';
+            document.getElementById('pc-hint').style.display = isMobile ? 'none' : 'block';
+
             generateLevel();
             setupControls();
-            setupPerformanceMonitor();            window.addEventListener('resize', onResize);
-            document.addEventListener('visibilitychange', handleVisibilityChange);
-        }
-
-        function setupPerformanceMonitor() {
-            if (!showFps) return;
-            
-            const fpsElement = document.getElementById('fps');
-            fpsElement.style.display = 'block';
-            
-            setInterval(() => {
-                fpsElement.textContent = `FPS: ${Math.round(fps)}`;
-            }, 1000);
-        }
-
-        function handleVisibilityChange() {
-            if (document.hidden) {
-                // Pause game when tab is hidden
-                isPlaying = false;
-            } else {
-                // Resume game when tab is visible
-                isPlaying = true;
-                lastFrameTime = performance.now();
-            }
+            window.addEventListener('resize', onResize);
         }
 
         function generateLevel() {
-            cleanupLevel(); // Proper cleanup before generating new level
+            platforms.forEach(p => scene.remove(p));            enemies.forEach(e => scene.remove(e));
+            if(cage) scene.remove(cage);
+            platforms = []; enemies = [];
             
             camera.position.set(0, 5, 0);
             isPlaying = true;
-            velY = 0;
-            jumps = 0;
 
-            // Start platform
             addBlock(0, 0, 0, 15, 15, 0x333333);
 
-            let z = -15;
-            let y = 0;
+            let z = -15, y = 0;
             const count = 5 + (vLvl * 2);
-            const platformColors = [0x0066ff, 0x00aa99, 0x6600ff, 0x00cc66];
 
             for(let i=0; i<count; i++) {
                 let x = (Math.random()-0.5) * 12;
                 y += (Math.random()-0.2) * 3;
                 z -= 15;
-                const color = platformColors[i % platformColors.length];
-                addBlock(x, y, z, 10, 10, color);
-                if(i % 2 === 1 && vLvl > 1) spawnMob(x, y+3, z); // Spawn mobs based on level
+                addBlock(x, y, z, 10, 10, 0x0066ff);
+                if(i % 2 === 1) spawnMob(x, y+3, z);
             }
-            // Goal platform
+
             z -= 20;
             addBlock(0, y, z, 15, 15, 0xff0066);
             spawnRescue(0, y+2, z);
-            
-            // Heal player on level start
-            if (vLvl > 1) {
-                hp = Math.min(maxHp, hp + 20);
-                showFeedback(`+20 HP`, '#0f0');
-                updateHUD();
-            }
-        }
-
-        function cleanupLevel() {
-            // Proper cleanup of all objects
-            platforms.forEach(p => scene.remove(p));
-            enemies.forEach(e => scene.remove(e));
-            bullets.forEach(b => scene.remove(b));
-            particles.forEach(p => scene.remove(p));
-            
-            if(cage) scene.remove(cage);
-            if(boobi) scene.remove(boobi);
-            
-            platforms = []; enemies = []; bullets = []; particles = [];
-            cage = null; boobi = null;
         }
 
         function addBlock(x, y, z, w, d, col) {
-            const widthSegments = Math.max(1, Math.floor(w / 2));
-            const depthSegments = Math.max(1, Math.floor(d / 2));
-            
-            const b = new THREE.Mesh(
-                new THREE.BoxGeometry(w, 2, d, widthSegments, 1, depthSegments),
-                new THREE.MeshStandardMaterial({
-                    color: col, 
-                    emissive: new THREE.Color(col).multiplyScalar(0.3),
-                    emissiveIntensity: 0.2,
-                    roughness: 0.7,
-                    metalness: 0.1
-                })
-            );
+            const b = new THREE.Mesh(new THREE.BoxGeometry(w, 2, d), new THREE.MeshStandardMaterial({color: col, emissive: col, emissiveIntensity: 0.2}));
             b.position.set(x, y, z);
-            b.userData.bounds = { 
-                xMin: x-w/2, xMax: x+w/2, 
-                zMin: z-d/2, zMax: z+d/2, 
-                y: y+1,
-                width: w,
-                depth: d
-            };            b.receiveShadow = false;
-            b.castShadow = false;
+            b.userData.bounds = { xMin: x-w/2, xMax: x+w/2, zMin: z-d/2, zMax: z+d/2, y: y+1 };
             scene.add(b);
             platforms.push(b);
         }
 
         function spawnMob(x, y, z) {
-            const m = new THREE.Mesh(
-                new THREE.BoxGeometry(2, 2, 2, 2, 2, 2), // Reduced segments
-                new THREE.MeshStandardMaterial({
-                    color: 0xff4400,
-                    emissive: 0xff2200,
-                    emissiveIntensity: 0.3,
-                    roughness: 0.8
-                })
-            );
+            const m = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshStandardMaterial({color: 0xff4400}));
             m.position.set(x, y, z);
-            m.userData = { 
-                hp: 1 + Math.floor(vLvl * 0.5), 
-                maxHp: 1 + Math.floor(vLvl * 0.5),
-                speed: 0.05 + (vLvl*0.01),
-                damage: 0.5 + (vLvl * 0.1),
-                lastHit: 0
-            };
-            m.castShadow = false;
+            m.userData = { hp: 1 + vLvl, speed: 0.05 + (vLvl*0.01) };
             scene.add(m);
             enemies.push(m);
         }
 
         function spawnRescue(x, y, z) {
-            cage = new THREE.Mesh(
-                new THREE.BoxGeometry(5, 6, 5, 2, 3, 2), // Reduced segments
-                new THREE.MeshStandardMaterial({
-                    color: 0xffffff,
-                    emissive: 0x00ffff,
-                    emissiveIntensity: 0.2,
-                    wireframe: true,
-                    transparent: true,
-                    opacity: 0.8
-                })
-            );
+            cage = new THREE.Mesh(new THREE.BoxGeometry(5, 6, 5), new THREE.MeshStandardMaterial({color: 0xffffff, wireframe: true}));
             cage.position.set(x, y+2, z);
-            
-            boobi = new THREE.Mesh(
-                new THREE.CylinderGeometry(0.7, 0.8, 2, 8), // Better geometry
-                new THREE.MeshStandardMaterial({
-                    color: 0xff0000,
-                    emissive: 0xff3333,
-                    emissiveIntensity: 0.5,
-                    roughness: 0.5                })
-            );
-            boobi.rotation.x = Math.PI/2;
+            boobi = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2, 1), new THREE.MeshStandardMaterial({color: 0xff0000}));
             boobi.position.copy(cage.position);
-            boobi.position.y += 0.5;
-            
             scene.add(cage, boobi);
         }
 
-        function setupControls() {
-            const joyBase = document.getElementById('joy-base');
-            const joyKnob = document.getElementById('joy-knob');
-            const jumpBtn = document.getElementById('jump-btn');
-            const shootBtn = document.getElementById('shoot-btn');
+        function setupControls() {            if (isMobile) setupMobileControls();
+            else setupPCControls();
+        }
+
+        function setupMobileControls() {
+            const joy = document.getElementById('joy-base'), knob = document.getElementById('joy-knob');
             
-            // Virtual joystick with better feedback
             window.addEventListener('touchstart', e => {
-                e.preventDefault(); // Prevent default touch behavior
-                
-                for(let i = 0; i < e.changedTouches.length; i++) {
-                    const t = e.changedTouches[i];
-                    const r = joyBase.getBoundingClientRect();
-                    const touchX = t.clientX - r.left;
-                    const touchY = t.clientY - r.top;
-                    
-                    if(touchX > 0 && touchX < r.width && touchY > 0 && touchY < r.height) {
+                for(let t of e.changedTouches) {
+                    let r = joy.getBoundingClientRect();
+                    if(t.clientX > r.left && t.clientX < r.right && t.clientY > r.top && t.clientY < r.bottom) {
                         touches.move = t.identifier;
-                        joyBase.classList.add('active');
                     } else if(!touches.look) {
                         touches.look = t.identifier;
-                        touches.lx = t.clientX; 
-                        touches.ly = t.clientY;
+                        touches.lx = t.clientX; touches.ly = t.clientY;
                     }
                 }
             }, {passive: false});
 
             window.addEventListener('touchmove', e => {
-                e.preventDefault();
-                
-                for(let i = 0; i < e.changedTouches.length; i++) {
-                    const t = e.changedTouches[i];
-                    
+                for(let t of e.changedTouches) {
                     if(t.identifier === touches.move) {
-                        const r = joyBase.getBoundingClientRect();
-                        const centerX = r.left + r.width/2;
-                        const centerY = r.top + r.height/2;
-                        let dx = t.clientX - centerX;
-                        let dy = t.clientY - centerY;
-                        
-                        let dist = Math.sqrt(dx*dx + dy*dy);                        const maxDist = r.width/2 - 25;
-                        
-                        if(dist > maxDist) {
-                            dist = maxDist;
-                            dx = dx * (maxDist / dist);
-                            dy = dy * (maxDist / dist);
-                        }
-                        
-                        const angle = Math.atan2(dy, dx);
-                        joyKnob.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
-                        move.x = Math.cos(angle) * (dist/maxDist);
-                        move.y = -Math.sin(angle) * (dist/maxDist);
+                        let r = joy.getBoundingClientRect();
+                        let dx = t.clientX - (r.left + 65), dy = t.clientY - (r.top + 65);
+                        let dist = Math.min(Math.sqrt(dx*dx+dy*dy), 55);
+                        let angle = Math.atan2(dy, dx);
+                        knob.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
+                        move.x = Math.cos(angle) * (dist/55); move.y = -Math.sin(angle) * (dist/55);
                     }
-                    
                     if(t.identifier === touches.look) {
-                        // Smoother camera movement
-                        const deltaX = (t.clientX - touches.lx) * 0.2;
-                        const deltaY = (t.clientY - touches.ly) * 0.2;
-                        
-                        look.x += deltaX;
-                        look.y += deltaY;
-                        
-                        // Clamp vertical look
-                        look.y = Math.max(-80, Math.min(80, look.y));
-                        
-                        touches.lx = t.clientX;
-                        touches.ly = t.clientY;
+                        look.x -= (t.clientX - touches.lx) * 0.25;
+                        look.y -= (t.clientY - touches.ly) * 0.25;
+                        touches.lx = t.clientX; touches.ly = t.clientY;
                     }
                 }
             }, {passive: false});
 
             window.addEventListener('touchend', e => {
-                e.preventDefault();
-                
-                for(let i = 0; i < e.changedTouches.length; i++) {
-                    const t = e.changedTouches[i];
-                    
+                for(let t of e.changedTouches) {
                     if(t.identifier === touches.move) { 
-                        touches.move = null; 
-                        move.x = 0; 
-                        move.y = 0; 
-                        joyKnob.style.transform = 'translate(0,0)';
-                        joyBase.classList.remove('active');
-                        joyKnob.classList.remove('active');
+                        touches.move = null; move.x = 0; move.y = 0; knob.style.transform = `translate(0,0)`;
                     }
-                    
-                    if(t.identifier === touches.look) {
-                        touches.look = null;
-                    }
-                }            });
-
-            // Button controls with visual feedback
-            jumpBtn.addEventListener('touchstart', () => { 
-                if(jumps < 2) { 
-                    velY = 0.35; 
-                    jumps++; 
-                    jumpBtn.classList.add('active');
-                    createParticles(camera.position.x, camera.position.y, camera.position.z, 10, 0x4400ff);
-                } 
-            });
-            
-            jumpBtn.addEventListener('touchend', () => {
-                jumpBtn.classList.remove('active');
-            });
-            
-            shootBtn.addEventListener('touchstart', () => { 
-                fire(); 
-                shootBtn.classList.add('active');
-            });
-            
-            shootBtn.addEventListener('touchend', () => {
-                shootBtn.classList.remove('active');
-            });
-
-            // Keyboard controls for testing
-            document.addEventListener('keydown', (e) => {
-                if(e.key === ' ') {
-                    if(jumps < 2) { velY = 0.35; jumps++; }
+                    if(t.identifier === touches.look) touches.look = null;
                 }
+            });
+
+            document.getElementById('jump-btn').ontouchstart = () => { if(jumps < 2) { velY = 0.35; jumps++; } };
+            document.getElementById('shoot-btn').ontouchstart = fire;
+        }
+        function setupPCControls() {
+            document.addEventListener('keydown', e => {
+                if(e.key === 'w' || e.key === 'ArrowUp') keys.w = true;
+                if(e.key === 'a' || e.key === 'ArrowLeft') keys.a = true;
+                if(e.key === 's' || e.key === 'ArrowDown') keys.s = true;
+                if(e.key === 'd' || e.key === 'ArrowRight') keys.d = true;
+                if(e.key === ' ') { if(jumps < 2) { velY = 0.35; jumps++; } }
                 if(e.key === 'f') fire();
             });
+
+            document.addEventListener('keyup', e => {
+                if(e.key === 'w' || e.key === 'ArrowUp') keys.w = false;
+                if(e.key === 'a' || e.key === 'ArrowLeft') keys.a = false;
+                if(e.key === 's' || e.key === 'ArrowDown') keys.s = false;
+                if(e.key === 'd' || e.key === 'ArrowRight') keys.d = false;
+            });
+
+            document.addEventListener('mousemove', e => {
+                if(e.buttons === 1) {
+                    look.x += e.movementX * 0.2;
+                    look.y += e.movementY * 0.2;
+                    look.y = Math.max(-85, Math.min(85, look.y));
+                }
+            });
+
+            document.addEventListener('mousedown', e => {
+                if(e.button === 0) fire();
+            });
+        }
+
+        function updatePCControls() {
+            move.x = (keys.d ? 1 : 0) + (keys.a ? -1 : 0);
+            move.y = (keys.s ? 1 : 0) + (keys.w ? -1 : 0);
+            const len = Math.sqrt(move.x*move.x + move.y*move.y);
+            if(len > 0) { move.x /= len; move.y /= len; }
         }
 
         function fire() {
-            const b = new THREE.Mesh(
-                bulletGeometry,
-                new THREE.MeshBasicMaterial({color: 0x00ff00})
-            );
+            const b = new THREE.Mesh(new THREE.SphereGeometry(0.2), new THREE.MeshBasicMaterial({color: 0x00ff00}));
             b.position.copy(camera.position);
             const dir = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
-            b.userData.v = dir.clone().multiplyScalar(2.5);
-            b.userData.lifetime = 2.0; // seconds
-            b.userData.birthTime = clock.getElapsedTime();
-            scene.add(b);
-            bullets.push(b);
-            
-            // Muzzle flash
-            gun.children[1].material.emissiveIntensity = 2.0;
-            setTimeout(() => {                gun.children[1].material.emissiveIntensity = 0.5;
-            }, 50);
-            
-            // Muzzle particles
-            createParticles(camera.position.x, camera.position.y, camera.position.z, 10, 0x4400ff);
-                } 
-            });
-            
-            jumpBtn.addEventListener('touchend', () => {
-                jumpBtn.classList.remove('active');
-            });
-            
-            shootBtn.addEventListener('touchstart', () => { 
-                fire(); 
-                shootBtn.classList.add('active');
-            });
-            
-            shootBtn.addEventListener('touchend', () => {
-                shootBtn.classList.remove('active');
-            });
-
-            // Keyboard controls for testing
-            document.addEventListener('keydown', (e) => {
-                if(e.key === ' ') {
-                    if(jumps < 2) { velY = 0.35; jumps++; }
-                }
-                if(e.key === 'f') fire();
-            });
+            b.userData.v = dir.multiplyScalar(2.5);
+            scene.add(b); bullets.push(b);
         }
 
-        function fire() {
-            const b = new THREE.Mesh(
-                bulletGeometry,
-                new THREE.MeshBasicMaterial({color: 0x00ff00})
-            );
-            b.position.copy(camera.position);
-            const dir = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
-            b.userData.v = dir.clone().multiplyScalar(2.5);
-            b.userData.lifetime = 2.0; // seconds
-            b.userData.birthTime = clock.getElapsedTime();
-            scene.add(b);
-            bullets.push(b);
-            
-            // Muzzle flash
-            gun.children[1].material.emissiveIntensity = 2.0;
-            setTimeout(() => {
-                gun.children[1].material.emissiveIntensity = 0.5;
-            }, 50);
-            
-            // Muzzle particles
-            createParticles(
-                camera.position.x + dir.x * 0.5,
-                camera.position.y + dir.y * 0.5,
-                camera.position.z + dir.z * 0.5,
-                15, 
-                0x00ff00,
-                0.1,
-                0.3
-            );
-        }
-
-        function createParticles(x, y, z, count, color, minSpeed = 0.05, maxSpeed = 0.2) {
-            for(let i = 0; i < count; i++) {
-                const p = new THREE.Mesh(
-                    new THREE.SphereGeometry(0.1, 4, 4), // Low poly particles
-                    new THREE.MeshBasicMaterial({
-                        color: color,
-                        transparent: true,
-                        opacity: 0.8
-                    })
-                );
-                p.position.set(x, y, z);
-                p.userData = {
-                    vx: (Math.random() - 0.5) * 2 * (maxSpeed - minSpeed) + minSpeed * (Math.random() > 0.5 ? 1 : -1),
-                    vy: (Math.random() - 0.2) * 2 * (maxSpeed - minSpeed) + minSpeed,
-                    vz: (Math.random() - 0.5) * 2 * (maxSpeed - minSpeed) + minSpeed * (Math.random() > 0.5 ? 1 : -1),
-                    lifetime: 0.5 + Math.random() * 0.5,
-                    birthTime: clock.getElapsedTime()
-                };
-                p.scale.set(0.5, 0.5, 0.5);
-                scene.add(p);
-                particles.push(p);
-            }
-        }
-
-        function showFeedback(message, color = '#0f0') {
-            const feedback = document.getElementById('feedback');
-            feedback.textContent = message;
-            feedback.style.color = color;
-            feedback.style.opacity = '1';
-            feedback.style.textShadow = `0 0 20px ${color}`;
-            
-            // Animate feedback
-            let opacity = 1;
-            const animateFeedback = () => {
-                if(opacity > 0) {
-                    opacity -= 0.02;
-                    feedback.style.opacity = opacity;
-                    feedback.style.transform = `translate(-50%, -50%) scale(${1 + (1-opacity)*0.5})`;
-                    requestAnimationFrame(animateFeedback);
-                } else {
-                    feedback.style.display = 'none';
-                }
-            };
-            
-            feedback.style.display = 'block';
-            setTimeout(animateFeedback, 1000);
-        }
-
-        function animate(time) {
+        function animate() {
             requestAnimationFrame(animate);
             if(!isPlaying) return;
-            
-            // FPS calculation
-            if (showFps) {
-                const now = performance.now();
-                const deltaTime = now - lastFrameTime;
-                lastFrameTime = now;
-                frameCount++;
-                if (frameCount >= 10) {
-                    fps = 1000 / (deltaTime / frameCount);
-                    frameCount = 0;
-                }
-            }
-            
-            const delta = clock.getDelta();
-            const elapsedTime = clock.getElapsedTime();
 
-            // Rotation with smoothing
+            if (!isMobile) updatePCControls();
             look.y = Math.max(-85, Math.min(85, look.y));
             camera.rotation.order = 'YXZ';
             camera.rotation.y = THREE.MathUtils.degToRad(look.x);
             camera.rotation.x = THREE.MathUtils.degToRad(look.y);
 
-            // Movement with delta time
-            const moveSpeed = 0.25 * (delta * 60); // Normalize for 60fps
             let forward = new THREE.Vector3(move.x, 0, -move.y).applyQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0), camera.rotation.y));
-            camera.position.add(forward.multiplyScalar(moveSpeed));
+            camera.position.add(forward.multiplyScalar(0.25));
 
-            // Physics with proper delta time
-            velY -= 0.016 * (delta * 60);
-            camera.position.y += velY * (delta * 60);
+            velY -= 0.016;
+            camera.position.y += velY;
 
-            // Ground collision detection - Optimized
-            let onGround = false;
-            for(let i = 0; i < platforms.length; i++) {
-                const p = platforms[i];
+            platforms.forEach(p => {
                 const b = p.userData.bounds;
-                
-                // Quick distance check first
-                if (Math.abs(camera.position.x - p.position.x) > b.width/2 + 1 || 
-                    Math.abs(camera.position.z - p.position.z) > b.depth/2 + 1) {
-                    continue;
-                }
-                
                 if(camera.position.x > b.xMin && camera.position.x < b.xMax && 
                    camera.position.z > b.zMin && camera.position.z < b.zMax) {
-                    if(camera.position.y > b.y-1 && camera.position.y < b.y + 1) {
+                    if(camera.position.y > b.y && camera.position.y < b.y + 2) {
                         camera.position.y = b.y + 0.8;
-                        velY = 0;
-                        jumps = 0;
-                        onGround = true;
+                        velY = 0; jumps = 0;
                     }
                 }
-            }
+            });
 
-            if(!onGround) {
-                jumps = Math.max(jumps, 1); // Allow double jump when falling
-            }
+            if(camera.position.y < -40) { hp -= 25; camera.position.set(0, 10, 0); updateHUD(); }
 
-            if(camera.position.y < -40) { 
-                takeDamage(25, "FELL OFF!"); 
-                camera.position.set(0, 10, 0); 
-                velY = 0;
-            }
-
-            // Enemies AI and collision
-            for(let i = enemies.length - 1; i >= 0; i--) {
-                const e = enemies[i];
-                const d = e.position.distanceTo(camera.position);
-                
-                if(d < 30) {
+            enemies.forEach(e => {
+                let d = e.position.distanceTo(camera.position);
+                if(d < 25) {
                     e.lookAt(camera.position.x, e.position.y, camera.position.z);
-                    
-                    // Smarter movement
-                    if(d > 3) {
-                        e.position.add(new THREE.Vector3().subVectors(camera.position, e.position).normalize().multiplyScalar(e.userData.speed * (delta * 60)));
-                    }
-                    
-                    // Damage player with cooldown
-                    if(d < 2 && elapsedTime - e.userData.lastHit > 1.0) {
-                        takeDamage(e.userData.damage, "ENEMY HIT!");
-                        e.userData.lastHit = elapsedTime;
-                        // Screen shake effect
-                        camera.position.x += (Math.random() - 0.5) * 0.2;
-                    }
+                    e.position.add(new THREE.Vector3().subVectors(camera.position, e.position).normalize().multiplyScalar(e.userData.speed));
+                    if(d < 2) { hp -= 0.5; updateHUD(); }
                 }
-                
-                // Enemy health visualization
-                if(e.userData.hp < e.userData.maxHp) {
-                    const healthRatio = e.userData.hp / e.userData.maxHp;
-                    e.material.color.setRGB(1, healthRatio, healthRatio);
-                    e.material.emissive.setRGB(1 - healthRatio, 0, 0);
-                }
-            }
+            });
 
-            // Bullets management
-            for(let i = bullets.length - 1; i >= 0; i--) {
-                const b = bullets[i];
-                const bulletAge = elapsedTime - b.userData.birthTime;
-                
-                // Remove old bullets
-                if(bulletAge > b.userData.lifetime) {
-                    scene.remove(b);
-                    bullets.splice(i, 1);
-                    continue;
-                }
-                
-                b.position.add(b.userData.v.clone().multiplyScalar(delta * 60));
-                
-                // Bullet collision with enemies
-                for(let j = enemies.length - 1; j >= 0; j--) {
-                    const e = enemies[j];
+            bullets.forEach((b, i) => {
+                b.position.add(b.userData.v);
+                enemies.forEach((e, j) => {
                     if(b.position.distanceTo(e.position) < 2) {
-                        e.userData.hp--;
-                        createParticles(e.position.x, e.position.y, e.position.z, 8, 0xff8800);
-                        
-                        if(e.userData.hp <= 0) {
-                            scene.remove(e);
-                            enemies.splice(j, 1);
-                            showFeedback("ENEMY DOWN!", '#ff8800');
-                        }
-                        
-                        scene.remove(b);
-                        bullets.splice(i, 1);
-                        break;
+                        scene.remove(e); enemies.splice(j,1);
+                        scene.remove(b); bullets.splice(i,1);
                     }
-                }
-            }
+                });
+            });
 
-            // Particles management
-            for(let i = particles.length - 1; i >= 0; i--) {
-                const p = particles[i];
-                const particleAge = elapsedTime - p.userData.birthTime;
-                
-                if(particleAge > p.userData.lifetime) {
-                    scene.remove(p);
-                    particles.splice(i, 1);
-                    continue;
-                }
-                
-                // Move particle
-                p.position.x += p.userData.vx * (delta * 60);
-                p.position.y += p.userData.vy * (delta * 60);
-                p.position.z += p.userData.vz * (delta * 60);
-                
-                // Fade out
-                const lifeRatio = 1 - (particleAge / p.userData.lifetime);
-                p.material.opacity = lifeRatio * 0.8;
-                p.scale.set(lifeRatio, lifeRatio, lifeRatio);
-            }
-
-            // Boobi Animation
-            if(boobi) {
-                boobi.position.y = boobi.position.y + Math.sin(elapsedTime * 3) * 0.02;
-                boobi.rotation.z = elapsedTime * 0.5;
-                
-                // Cage animation
-                cage.rotation.y = elapsedTime * 0.2;
-                cage.material.opacity = 0.7 + Math.sin(elapsedTime * 2) * 0.1;
-            }
-
-            if(boobi && camera.position.distanceTo(boobi.position) < 4) win();
+            if(boobi) boobi.position.y += Math.sin(Date.now()*0.005)*0.01;
+            if(boobi && camera.position.distanceTo(boobi.position) < 5) win();
 
             renderer.render(scene, camera);
         }
-
-        function takeDamage(amount, reason = "") {
-            hp -= amount;
-            updateHUD();
-            
-            if(reason) {
-                showFeedback(`-${Math.round(amount)} HP: ${reason}`, '#f00');
-            }
-            
-            // Screen flash
-            document.body.style.backgroundColor = '#300';
-            setTimeout(() => {
-                document.body.style.backgroundColor = '';
-            }, 100);
-            
-            // Screen shake
-            const originalX = camera.position.x;
-            const shakeAmount = 0.1 * amount;
-            
-            for(let i = 0; i < 5; i++) {
-                setTimeout(() => {
-                    camera.position.x = originalX + (Math.random() - 0.5) * shakeAmount;
-                }, i * 50);
-            }
-            setTimeout(() => {
-                camera.position.x = originalX;
-            }, 250);
-        }
-
         function updateHUD() {
-            document.getElementById('hp-val').style.width = `${Math.max(0, hp)}%`;
-            document.getElementById('hp-val').style.background = hp > 50 ? '#0f0' : hp > 25 ? '#ff0' : '#f00';
-            
-            if(hp <= 0) { 
-                isPlaying = false;
-                setTimeout(() => {
-                    alert("GRIND OVER. TRY AGAIN.");
-                    location.reload();
-                }, 500);
-            }
+            document.getElementById('hp-val').style.width = hp + "%";
+            if(hp <= 0) { alert("GRIND OVER. TRY AGAIN."); location.reload(); }
         }
 
         function win() {
             isPlaying = false;
             vLvl++;
-            maxHp += 10; // Increase max HP on level up
             document.getElementById('vlvl').innerText = vLvl;
-            document.getElementById('new-lvl').innerText = vLvl;
             document.getElementById('win-screen').style.display = 'flex';
-            showFeedback(`LEVEL ${vLvl} UNLOCKED!`, '#0ff');
-            
             setTimeout(() => {
                 document.getElementById('win-screen').style.display = 'none';
                 generateLevel();
-            }, 2500);
+            }, 2000);
         }
 
         function onResize() {
