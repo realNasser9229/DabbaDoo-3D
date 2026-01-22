@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>DABBADOO: ALPHA NEON</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap');
@@ -11,18 +11,24 @@
         @media (orientation: portrait) { #lock { display: flex; } }
         #hud { position: absolute; top: 20px; left: 20px; z-index: 10; pointer-events: none; color: #0f0; }
         #hp-bg { width: 180px; height: 10px; background: #200; border: 2px solid #fff; margin-top: 5px; }
-        #hp-val { width: 100%; height: 100%; background: #f00; box-shadow: 0 0 10px #f00; }
+        #hp-val { width: 100%; height: 100%; background: #f00; box-shadow: 0 0 10px #f00; transition: width 0.2s; }
         .btn { position: absolute; z-index: 20; border-radius: 50%; border: 3px solid #fff; color: #fff; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); box-shadow: 0 0 15px rgba(255,255,255,0.2); }
         #jump-btn { bottom: 130px; right: 40px; width: 85px; height: 85px; background: #60f; font-size: 18px; }
         #shoot-btn { bottom: 20px; right: 30px; width: 115px; height: 115px; background: #f04; font-size: 22px; border-color: #ff0; }
         #joy-base { position: absolute; bottom: 35px; left: 35px; width: 130px; height: 130px; border: 2px solid #0ff; border-radius: 50%; background: rgba(0,255,255,0.1); }
         #joy-knob { position: absolute; top: 40px; left: 40px; width: 50px; height: 50px; background: #0ff; border-radius: 50%; box-shadow: 0 0 20px #0ff; }
-        #win { position: fixed; inset: 0; background: rgba(0,0,0,0.9); color: #fff; display: none; align-items: center; justify-content: center; flex-direction: column; z-index: 500; font-size: 60px; text-shadow: 0 0 20px #0f0; }
+        #win { position: fixed; inset: 0; background: rgba(0,0,0,0.9); color: #fff; display: none; align-items: center; justify-content: center; flex-direction: column; z-index: 500; font-size: 60px; text-shadow: 0 0 20px #0f0; transition: opacity 0.5s; }
+        #score { font-size: 20px; margin-top: 10px; }
+        #restart-btn { margin-top: 20px; padding: 10px 20px; font-size: 18px; background: #0f0; color: #000; border: none; border-radius: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
     <div id="lock"><h1>ROTATE SCREEN ALPHA</h1></div>
-    <div id="win"><h1>THX BRO!</h1><p style="font-size: 20px;">VULVIAN LEVEL UP</p></div>
+    <div id="win">
+        <h1>THX BRO!</h1>
+        <p id="score" style="font-size: 20px;">VULVIAN LEVEL UP</p>
+        <button id="restart-btn">Next Level</button>
+    </div>
     <div id="hud">V-LVL: <span id="vlvl">1</span><div id="hp-bg"><div id="hp-val"></div></div></div>
     <div id="joy-base"><div id="joy-knob"></div></div>
     <div id="jump-btn" class="btn">JUMP</div>
@@ -31,10 +37,16 @@
     <script src="https://unpkg.com/three@0.155.0/build/three.min.js"></script>
     <script>
         let scene, camera, renderer, gun, clock;
-        let platforms = [], enemies = [], bullets = [];
-        let vLvl = 1, hp = 100, isPlaying = true, jumps = 0, velY = 0;
+        let platforms = [], enemies = [], bullets = [], particles = [];
+        let vLvl = 1, hp = 100, isPlaying = true, jumps = 0, velY = 0, score = 0;
         let move = { x: 0, y: 0 }, look = { x: 0, y: 0 }, touches = { move: null, look: null, lx: 0, ly: 0 };
         let boobi, cage, groundCheck = 0;
+        let audioEnabled = true;
+
+        // Sound effects
+        const jumpSound = new Audio('https://www.soundjay.com/buttons/sounds/button-13.mp3');
+        const shootSound = new Audio('https://www.soundjay.com/buttons/sounds/button-12.mp3');
+        const winSound = new Audio('https://www.soundjay.com/human/sounds/cheering-1.mp3');
 
         init(); animate();
 
@@ -49,6 +61,11 @@
             const ambient = new THREE.AmbientLight(0xffffff, 0.6);
             const pLight = new THREE.PointLight(0x0f0, 2, 50);
             scene.add(ambient, pLight);
+
+            // Background music
+            const bgMusic = new Audio('https://www.soundjay.com/ambience/sounds/ambience-loop-1.mp3');
+            bgMusic.loop = true;
+            bgMusic.play();
 
             // ARM
             gun = new THREE.Group();
@@ -89,15 +106,27 @@
             });
             document.getElementById('jump-btn').ontouchstart = (e) => { 
                 e.preventDefault();
-                if(groundCheck > 0 || jumps < 2) { velY = 0.36; jumps++; groundCheck = 0; }
+                if(groundCheck > 0 || jumps < 2) {
+                    velY = 0.36; jumps++; groundCheck = 0;
+                    if (audioEnabled) jumpSound.play();
+                }
             };
-            document.getElementById('shoot-btn').ontouchstart = (e) => { e.preventDefault(); fire(); };
+            document.getElementById('shoot-btn').ontouchstart = (e) => {
+                e.preventDefault();
+                fire();
+                if (audioEnabled) shootSound.play();
+            };
+            document.getElementById('restart-btn').addEventListener('click', () => {
+                win();
+            });
         }
 
         function build() {
             platforms.forEach(p => scene.remove(p)); enemies.forEach(e => scene.remove(e));
             if(cage) scene.remove(cage); if(boobi) scene.remove(boobi);
             platforms = []; enemies = []; isPlaying = true; camera.position.set(0, 5, 0);
+            score = 0;
+            updateScore();
             
             addBox(0, 0, 0, 20, 20, 0x222222); // Start
             let z = -18, y = 0;
@@ -176,15 +205,36 @@
                 b.position.add(b.userData.v);
                 enemies.forEach((e, j) => {
                     if(b.position.distanceTo(e.position) < 2) {
-                        scene.remove(e); enemies.splice(j,1); scene.remove(b); bullets.splice(i,1);
+                        scene.remove(e); enemies.splice(j,1);
+                        scene.remove(b); bullets.splice(i,1);
+                        score += 10;
+                        updateScore();
+                        // Add explosion effect
+                        for (let i = 0; i < 10; i++) {
+                            createParticle(b.position, 0x0f0, 0.2);
+                        }
                     }
                 });
             });
 
             if(boobi) {
                 boobi.rotation.y += 0.05;
-                if(camera.position.distanceTo(boobi.position) < 5) win();
+                if(camera.position.distanceTo(boobi.position) < 5) {
+                    win();
+                    if (audioEnabled) winSound.play();
+                }
             }
+
+            // Update particles
+            for (let p of particles) {
+                p.position.y += 0.05;
+                p.scale.multiplyScalar(0.95);
+                if (p.scale.x < 0.1) {
+                    scene.remove(p);
+                    particles.splice(particles.indexOf(p), 1);
+                }
+            }
+
             renderer.render(scene, camera);
         }
 
@@ -193,10 +243,24 @@
             if(hp <= 0) { alert("NO ALPHA DETECTED. RESTARTING."); location.reload(); }
         }
 
+        function updateScore() {
+            document.getElementById('score').innerText = "Score: " + score;
+        }
+
+        function createParticle(pos, color, size) {
+            const geo = new THREE.SphereGeometry(size, 4, 4);
+            const mat = new THREE.MeshBasicMaterial({ color: color });
+            const p = new THREE.Mesh(geo, mat);
+            p.position.copy(pos);
+            p.scale.set(1, 1, 1);
+            scene.add(p);
+            particles.push(p);
+        }
+
         function win() {
             isPlaying = false; vLvl++; document.getElementById('vlvl').innerText = vLvl;
             document.getElementById('win').style.display = 'flex';
-            setTimeout(() => { document.getElementById('win').style.display = 'none'; build(); }, 2000);
+            setTimeout(() => { build(); }, 2000);
         }
     </script>
 </body>
