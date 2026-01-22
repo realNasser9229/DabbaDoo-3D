@@ -2,83 +2,33 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DabbaDoo 🔥</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; font-family: sans-serif; }
-        
-        /* The Crosshair */
+        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; }
         #crosshair {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 10px;
-            height: 10px;
-            border: 2px solid rgba(0, 255, 0, 0.5);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none; /* Allows clicks to pass through to the game */
+            position: absolute; top: 50%; left: 50%;
+            width: 10px; height: 10px; border: 2px solid white;
+            border-radius: 50%; transform: translate(-50%, -50%);
+            pointer-events: none; z-index: 10;
         }
-
-        /* Instructions Overlay */
-        #instructions {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            text-align: center;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 20px;
-            border: 2px solid #ff00ff;
-            cursor: pointer;
-            z-index: 10;
-        }
-
-        #loading {
-            position: absolute;
-            width: 100%;
-            text-align: center;
-            top: 20%;
-            color: #00ff00;
-            text-transform: uppercase;
-            letter-spacing: 5px;
+        #overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center;
+            align-items: center; color: white; background: rgba(0,0,0,0.8);
+            z-index: 20; cursor: pointer;
         }
     </style>
 </head>
 <body>
-
-    <h1 id="loading">DabbaDoo</h1>
-
-    <div id="instructions">
-        <h1>CLICK TO START</h1>
-        <p>(W,A,S,D = Walk | SPACE = Jump | CLICK = Shoot)</p>
+    <div id="overlay">
+        <h1>DabbaDoo</h1>
+        <p>CLICK TO SPAWN</p>
+        <p>(WASD to Move, Space to Jump)</p>
     </div>
-
     <div id="crosshair"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/controls/PointerLockControls.js"></script>
     <script src="game.js"></script>
-
-    <script>
-        // Handle the UI logic
-        const instructions = document.getElementById('instructions');
-        
-        // Hide instructions when the game starts
-        document.addEventListener('click', () => {
-            // game.js handles the controls.lock(), we just hide the UI
-            if (typeof controls !== 'undefined' && !controls.isLocked) {
-                instructions.style.display = 'none';
-            }
-        });
-
-        // Show instructions if user hits ESC (unlocks mouse)
-        document.addEventListener('pointerlockchange', () => {
-            if (document.pointerLockElement === null) {
-                instructions.style.display = 'block';
-            }
-        });
-    </script>
 </body>
 </html>
