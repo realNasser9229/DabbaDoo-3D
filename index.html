@@ -2,39 +2,47 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DabbaDoo OVERCOOKED 🔥</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
+    <title>DabbaDoo PRO MOBILE</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; touch-action: none; font-family: sans-serif; }
+        body { margin: 0; overflow: hidden; background-color: #000; touch-action: none; font-family: 'Courier New', monospace; }
         
         /* UI OVERLAY */
         #crosshair {
             position: absolute; top: 50%; left: 50%;
-            width: 14px; height: 14px; border: 2px solid rgba(0, 255, 0, 0.8);
+            width: 20px; height: 20px; border: 2px solid rgba(0, 255, 0, 0.5);
             border-radius: 50%; transform: translate(-50%, -50%);
             z-index: 10; pointer-events: none;
         }
-        #crosshair::before { content: ''; position: absolute; top: 50%; left: 50%; width: 2px; height: 2px; background: lime; transform: translate(-50%, -50%); }
 
-        /* CONTROLS */
+        /* CONTROLS - Half Transparent */
         .btn {
             position: absolute; border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
             display: flex; align-items: center; justify-content: center;
             color: white; font-weight: bold; user-select: none; z-index: 20;
+            backdrop-filter: blur(2px);
         }
-        #joystick-base { width: 100px; height: 100px; bottom: 40px; left: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; position: absolute; }
-        #joystick-knob { width: 50px; height: 50px; background: rgba(255,255,255,0.3); border-radius: 50%; position: absolute; top: 25px; left: 25px; }
         
-        #jump-btn { width: 70px; height: 70px; bottom: 130px; right: 40px; }
-        #shoot-btn { width: 90px; height: 90px; bottom: 30px; right: 40px; background: rgba(255, 0, 0, 0.3); }
+        /* Layout for both Portrait and Landscape */
+        #joystick-base { width: 100px; height: 100px; bottom: 5vh; left: 5vw; background: rgba(255,255,255,0.1); border-radius: 50%; position: absolute; }
+        #joystick-knob { width: 50px; height: 50px; background: rgba(0,255,0,0.3); border-radius: 50%; position: absolute; top: 25px; left: 25px; }
         
-        #stats { position: absolute; top: 10px; left: 10px; color: lime; font-family: monospace; z-index: 30; }
+        #jump-btn { width: 80px; height: 80px; bottom: 20vh; right: 5vw; font-size: 12px; }
+        #shoot-btn { width: 100px; height: 100px; bottom: 4vh; right: 5vw; background: rgba(255, 0, 0, 0.2); border-color: rgba(255,0,0,0.4); }
+        
+        #stats { position: absolute; top: 10px; left: 10px; color: lime; z-index: 30; font-size: 18px; }
+        
+        /* Responsive landscape fixes */
+        @media (orientation: landscape) {
+            #jump-btn { bottom: 35vh; right: 5vw; }
+            #shoot-btn { bottom: 5vh; right: 5vw; }
+        }
     </style>
 </head>
 <body>
-    <div id="stats">KILLS: <span id="score">0</span></div>
+    <div id="stats">SCORE: <span id="score">0</span></div>
     <div id="crosshair"></div>
     
     <div id="joystick-base"><div id="joystick-knob"></div></div>
@@ -47,13 +55,15 @@
         let scene, camera, renderer, clock, gunGroup;
         let bullets = [], enemies = [], score = 0;
         
-        // Input state
+        // --- SETTINGS ---
+        const INVERT_Y = true; // Set to false for normal
+        const MOVE_SPEED = 0.18;
+        const LOOK_SENSITIVITY = 0.18;
+
         let moveState = { forward: 0, right: 0 };
         let lookState = { lon: 0, lat: 0 };
         let velocityY = 0;
         let isGrounded = true;
-
-        // Touch Tracking
         let touchData = { lookId: null, moveId: null, lastX: 0, lastY: 0 };
 
         init();
@@ -61,7 +71,7 @@
 
         function init() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x050505);
+            scene.background = new THREE.Color(0x020202);
             clock = new THREE.Clock();
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -72,59 +82,50 @@
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             document.body.appendChild(renderer.domElement);
 
-            // Lights
-            const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
             const sun = new THREE.DirectionalLight(0x00ffff, 1);
             sun.position.set(5, 10, 5);
-            scene.add(ambient, sun);
+            scene.add(sun);
 
-            // Environment
-            const grid = new THREE.GridHelper(200, 40, 0xff00ff, 0x222222);
+            // Floor & Neon Environment
+            const grid = new THREE.GridHelper(300, 60, 0xff00ff, 0x111111);
             scene.add(grid);
 
-            // THE GUN (Parented to Camera)
+            // The Gun
             gunGroup = new THREE.Group();
-            const arm = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.6), new THREE.MeshStandardMaterial({color: 0x333333}));
-            arm.position.set(0.4, -0.4, -0.6);
-            const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 0.4), new THREE.MeshStandardMaterial({color: 0x111111}));
-            barrel.position.set(0.4, -0.35, -1.0);
-            gunGroup.add(arm, barrel);
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.2, 0.7), new THREE.MeshStandardMaterial({color: 0x222222}));
+            const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.5), new THREE.MeshStandardMaterial({color: 0x000000}));
+            barrel.rotation.x = Math.PI / 2;
+            barrel.position.z = -0.4;
+            gunGroup.add(body, barrel);
+            gunGroup.position.set(0.4, -0.3, -0.6);
             camera.add(gunGroup);
             scene.add(camera);
 
-            // Enemies
-            for(let i=0; i<20; i++) spawnEnemy();
+            for(let i=0; i<25; i++) spawnEnemy();
 
-            // MOBILE CONTROLS LOGIC
             setupTouch();
-            
-            window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            });
+            window.addEventListener('resize', onWindowResize);
         }
 
         function spawnEnemy() {
-            const e = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2, 1.2), new THREE.MeshStandardMaterial({color: 0xff0055, emissive: 0x330000}));
-            e.position.set(Math.random()*60-30, 1, Math.random()*-60);
+            const e = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2, 1.5), new THREE.MeshStandardMaterial({color: 0xff0000, emissive: 0x220000}));
+            e.position.set(Math.random()*100-50, 1, Math.random()*-100);
             scene.add(e);
             enemies.push(e);
         }
 
         function setupTouch() {
-            const joystickKnob = document.getElementById('joystick-knob');
             const joyBase = document.getElementById('joystick-base');
+            const joyKnob = document.getElementById('joystick-knob');
 
             window.addEventListener('touchstart', e => {
                 for(let t of e.changedTouches) {
-                    // Check if touching right side (Look)
                     if (t.clientX > window.innerWidth/2 && !touchData.lookId) {
                         touchData.lookId = t.identifier;
                         touchData.lastX = t.clientX;
                         touchData.lastY = t.clientY;
                     }
-                    // Check if touching joystick
                     let rect = joyBase.getBoundingClientRect();
                     if (t.clientX > rect.left && t.clientX < rect.right && t.clientY > rect.top && t.clientY < rect.bottom) {
                         touchData.moveId = t.identifier;
@@ -137,8 +138,9 @@
                     if (t.identifier === touchData.lookId) {
                         let dx = t.clientX - touchData.lastX;
                         let dy = t.clientY - touchData.lastY;
-                        lookState.lon -= dx * 0.15;
-                        lookState.lat -= dy * 0.15;
+                        lookState.lon -= dx * LOOK_SENSITIVITY;
+                        // INVERSION LOGIC
+                        lookState.lat += (INVERT_Y ? dy : -dy) * LOOK_SENSITIVITY;
                         touchData.lastX = t.clientX;
                         touchData.lastY = t.clientY;
                     }
@@ -150,9 +152,7 @@
                         let dy = t.clientY - centerY;
                         let dist = Math.min(Math.sqrt(dx*dx + dy*dy), 50);
                         let angle = Math.atan2(dy, dx);
-                        
-                        joystickKnob.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
-                        
+                        joyKnob.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
                         moveState.forward = -Math.sin(angle) * (dist/50);
                         moveState.right = Math.cos(angle) * (dist/50);
                     }
@@ -165,72 +165,63 @@
                     if (t.identifier === touchData.moveId) {
                         touchData.moveId = null;
                         moveState.forward = 0; moveState.right = 0;
-                        joystickKnob.style.transform = `translate(0px, 0px)`;
+                        joyKnob.style.transform = `translate(0px, 0px)`;
                     }
                 }
             });
 
-            document.getElementById('shoot-btn').addEventListener('touchstart', shoot);
-            document.getElementById('jump-btn').addEventListener('touchstart', () => {
-                if(isGrounded) { velocityY = 0.15; isGrounded = false; }
+            document.getElementById('shoot-btn').addEventListener('touchstart', (e) => { e.preventDefault(); shoot(); });
+            document.getElementById('jump-btn').addEventListener('touchstart', (e) => { 
+                e.preventDefault();
+                if(isGrounded) { velocityY = 0.22; isGrounded = false; }
             });
         }
 
         function shoot() {
-            const b = new THREE.Mesh(new THREE.SphereGeometry(0.15), new THREE.MeshBasicMaterial({color: 0xffff00}));
+            const b = new THREE.Mesh(new THREE.SphereGeometry(0.2), new THREE.MeshBasicMaterial({color: 0x00ff00}));
             b.position.copy(camera.position);
             const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-            b.userData.v = dir.multiplyScalar(1.2);
+            b.userData.v = dir.multiplyScalar(1.5);
             scene.add(b);
             bullets.push(b);
-            
-            // Recoil
-            gunGroup.position.z += 0.2;
+            gunGroup.position.z += 0.25; // Kickback
         }
 
         function animate() {
             requestAnimationFrame(animate);
-            const delta = clock.getDelta();
             const time = performance.now() * 0.01;
 
-            // Look Rotation
+            // Camera Look
             lookState.lat = Math.max(-85, Math.min(85, lookState.lat));
             camera.rotation.order = 'YXZ';
             camera.rotation.y = THREE.MathUtils.degToRad(lookState.lon);
             camera.rotation.x = THREE.MathUtils.degToRad(lookState.lat);
 
-            // Movement
+            // Movement Physics
             if (moveState.forward !== 0 || moveState.right !== 0) {
-                const speed = 0.15;
-                camera.translateZ(-moveState.forward * speed);
-                camera.translateX(moveState.right * speed);
-                
-                // WALK ANIMATION (Gun Bobbing)
-                gunGroup.position.y = -0.1 + Math.sin(time * 0.8) * 0.02;
-                gunGroup.position.x = Math.cos(time * 0.4) * 0.02;
-            } else {
-                // Idle breathe
-                gunGroup.position.y = -0.1 + Math.sin(time * 0.2) * 0.01;
+                camera.translateZ(-moveState.forward * MOVE_SPEED);
+                camera.translateX(moveState.right * MOVE_SPEED);
+                gunGroup.position.y = -0.3 + Math.sin(time * 0.8) * 0.02; // Walk bob
             }
             
-            // Recoil recovery
-            gunGroup.position.z += (0 - gunGroup.position.z) * 0.1;
-
-            // Gravity/Jump
+            // Gravity Logic
             camera.position.y += velocityY;
             if (camera.position.y > 1.7) {
-                velocityY -= 0.008; 
+                velocityY -= 0.01; 
             } else {
                 camera.position.y = 1.7;
                 velocityY = 0;
                 isGrounded = true;
             }
 
-            // Bullets
+            // Gun Recoil Return
+            gunGroup.position.z += ( -0.6 - gunGroup.position.z) * 0.1;
+
+            // Bullets & Enemies
             for(let i=bullets.length-1; i>=0; i--) {
                 bullets[i].position.add(bullets[i].userData.v);
                 enemies.forEach((e, j) => {
-                    if (bullets[i] && bullets[i].position.distanceTo(e.position) < 1.5) {
+                    if (bullets[i] && bullets[i].position.distanceTo(e.position) < 1.8) {
                         scene.remove(e);
                         enemies.splice(j, 1);
                         scene.remove(bullets[i]);
@@ -240,13 +231,19 @@
                         spawnEnemy();
                     }
                 });
-                if(bullets[i] && bullets[i].position.length() > 100) {
+                if(bullets[i] && bullets[i].position.length() > 200) {
                     scene.remove(bullets[i]);
                     bullets.splice(i, 1);
                 }
             }
 
             renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         }
     </script>
 </body>
