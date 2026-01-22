@@ -4,29 +4,17 @@
     <meta charset="UTF-8">
     <title>DabbaDoo 🔥</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; }
+        body { margin: 0; overflow: hidden; background: #000; cursor: crosshair; }
         #crosshair {
             position: absolute; top: 50%; left: 50%;
-            width: 10px; height: 10px; border: 2px solid white;
+            width: 8px; height: 8px; background: white;
             border-radius: 50%; transform: translate(-50%, -50%);
-            pointer-events: none; z-index: 10;
-        }
-        #overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; justify-content: center;
-            align-items: center; color: white; background: rgba(0,0,0,0.8);
-            z-index: 20; cursor: pointer;
+            pointer-events: none; mix-blend-mode: difference;
         }
     </style>
 </head>
 <body>
-    <div id="overlay">
-        <h1>DabbaDoo</h1>
-        <p>CLICK TO SPAWN</p>
-        <p>(WASD to Move, Space to Jump)</p>
-    </div>
     <div id="crosshair"></div>
-
     <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/controls/PointerLockControls.js"></script>
     <script src="game.js"></script>
