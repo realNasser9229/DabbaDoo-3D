@@ -62,6 +62,10 @@ function init() {
     window.addEventListener('resize', onWindowResize);
     window.addEventListener('click', shoot);
     window.addEventListener('keydown', onKeyDown);
+
+    // ======= FIX: Hide loading text when scene is ready =======
+    const loadingText = document.getElementById("loading");
+    if (loadingText) loadingText.style.display = "none";
 }
 
 // =========================
@@ -197,111 +201,3 @@ function createPlatforms() {
         );
         plat.position.set(Math.random() * 20 - 10, Math.random() * 2, -i * 5);
         scene.add(plat);
-        platforms.push(plat);
-    }
-}
-
-// =========================
-// INPUT HANDLERS
-// =========================
-function onKeyDown(event) {
-    if (event.code === 'Space') {
-        camera.position.y += 1; // simple double jump
-        // Halo particles
-        const halo = new THREE.Mesh(
-            new THREE.SphereGeometry(0.2, 6, 6),
-            new THREE.MeshBasicMaterial({ color: 0xffff00 })
-        );
-        halo.position.copy(camera.position);
-        scene.add(halo);
-        haloParticles.push(halo);
-    }
-}
-
-function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-// =========================
-// ANIMATION LOOP
-// =========================
-function animate() {
-    requestAnimationFrame(animate);
-
-    const delta = clock.getDelta();
-
-    // Move enemies toward player
-    enemies.forEach((e, idx) => {
-        const dir = new THREE.Vector3();
-        dir.subVectors(camera.position, e.position).normalize().multiplyScalar(0.5 * delta * 60);
-        e.position.add(dir);
-    });
-
-    // Update bullets
-    bullets.forEach((b, i) => {
-        b.position.add(b.velocity);
-        // Bullet out of range
-        if (b.position.length() > 100) {
-            scene.remove(b);
-            bullets.splice(i, 1);
-        }
-        // Check collision with enemies
-        enemies.forEach((e, j) => {
-            if (b.position.distanceTo(e.position) < 1) {
-                // Enemy death particle effect
-                explodeEnemy(e);
-                scene.remove(e);
-                enemies.splice(j, 1);
-                scene.remove(b);
-                bullets.splice(i, 1);
-            }
-        });
-    });
-
-    // Halo particles fade
-    haloParticles.forEach((h, i) => {
-        h.material.opacity -= 0.02;
-        if (h.material.opacity <= 0) {
-            scene.remove(h);
-            haloParticles.splice(i, 1);
-        }
-    });
-
-    // Shaky Neon Platforms
-    platforms.forEach((p, idx) => {
-        p.position.y += Math.sin(Date.now() * 0.005 + idx) * 0.01;
-    });
-
-    renderer.render(scene, camera);
-}
-
-// =========================
-// ENEMY EXPLOSION
-// =========================
-function explodeEnemy(enemy) {
-    for (let i = 0; i < 5; i++) {
-        const cube = new THREE.Mesh(
-            new THREE.BoxGeometry(0.2, 0.2, 0.2),
-            new THREE.MeshStandardMaterial({ color: 0xff0000 })
-        );
-        cube.position.copy(enemy.position);
-        cube.velocity = new THREE.Vector3(
-            (Math.random() - 0.5) * 2,
-            Math.random() * 2,
-            (Math.random() - 0.5) * 2
-        );
-        scene.add(cube);
-
-        // Animate small debris
-        const interval = setInterval(() => {
-            cube.position.add(cube.velocity.multiplyScalar(0.05));
-        }, 16);
-
-        setTimeout(() => {
-            scene.remove(cube);
-            clearInterval(interval);
-        }, 1000);
-    }
-}
