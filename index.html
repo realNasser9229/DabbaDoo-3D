@@ -3,331 +3,300 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DABBADOO: VULVIAN DESTINY</title>
+    <title>DABBADOO: FINAL SIGMA</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');
-
-        body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap');
+        body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Black Ops One', system-ui; }
         
-        #landscape-msg { 
-            position: fixed; top:0; left:0; width:100%; height:100%; background: #000; color: #0f0; 
-            display: none; align-items: center; justify-content: center; z-index: 10000; text-align: center;
-            font-family: 'Permanent Marker', cursive; font-size: 24px;
-        }
-        @media (orientation: portrait) { #landscape-msg { display: flex; } }
+        /* Orientation Force */
+        #lock { position: fixed; inset: 0; background: #000; color: #f00; z-index: 1000; display: none; align-items: center; justify-content: center; text-align: center; border: 10px solid #f00; }
+        @media (orientation: portrait) { #lock { display: flex; } }
 
-        /* HUD Styling */
-        #hud { position: absolute; top: 10px; left: 10px; z-index: 100; pointer-events: none; width: 100%; }
-        .stat-group { display: flex; gap: 20px; margin-bottom: 10px; }
-        .stat { background: rgba(0,255,100,0.1); border-left: 5px solid #0f0; padding: 5px 15px; color: #fff; }
-        .stat-label { font-size: 10px; text-transform: uppercase; color: #0f0; display: block; }
-        .stat-value { font-size: 20px; font-weight: bold; font-family: 'Permanent Marker'; }
-        
-        #hp-bar { width: 200px; height: 10px; background: rgba(255,0,0,0.2); border: 1px solid #f00; border-radius: 5px; overflow: hidden; }
-        #hp-fill { width: 100%; height: 100%; background: #f00; transition: width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        /* HUD */
+        #hud { position: absolute; top: 20px; left: 20px; z-index: 10; pointer-events: none; }
+        .stat { color: #0f0; font-size: 22px; text-shadow: 2px 2px #000; margin-bottom: 5px; }
+        #hp-bg { width: 200px; height: 12px; background: rgba(0,0,0,0.5); border: 2px solid #fff; }
+        #hp-val { width: 100%; height: 100%; background: #f00; transition: 0.2s; }
 
-        /* Crosshair */
-        #crosshair { 
-            position: absolute; top: 50%; left: 50%; width: 30px; height: 30px; 
-            transform: translate(-50%, -50%); z-index: 50; pointer-events: none; 
-        }
-        .ch-line { position: absolute; background: #0f0; transition: 0.1s; box-shadow: 0 0 10px #0f0; }
-        #ch-v { width: 2px; height: 100%; left: 14px; }
-        #ch-h { width: 100%; height: 2px; top: 14px; }
+        /* Buttons */
+        .btn { position: absolute; z-index: 20; border-radius: 50%; border: 3px solid #fff; color: #fff; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); font-size: 14px; }
+        #jump-btn { bottom: 120px; right: 40px; width: 80px; height: 80px; background: #4400ff; }
+        #shoot-btn { bottom: 20px; right: 30px; width: 110px; height: 110px; background: #ff0044; border-color: #ff0; font-size: 20px; }
 
-        /* Controls */
-        #joy-base { position: absolute; bottom: 40px; left: 40px; width: 120px; height: 120px; background: rgba(255,255,255,0.05); border: 2px solid rgba(0,255,255,0.3); border-radius: 50%; z-index: 100; }
-        #joy-knob { position: absolute; top: 35px; left: 35px; width: 50px; height: 50px; background: #0ff; border-radius: 50%; box-shadow: 0 0 20px #0ff; }
-        
-        .action-btn { position: absolute; z-index: 100; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid #fff; font-family: 'Permanent Marker'; }
-        #jump-btn { bottom: 140px; right: 40px; width: 80px; height: 80px; background: rgba(100,0,255,0.5); }
-        #fire-btn { bottom: 30px; right: 30px; width: 110px; height: 110px; background: rgba(255,0,50,0.6); font-size: 20px; border-color: #ff0; text-shadow: 0 0 10px #ff0; }
+        /* FIXED JOYSTICK */
+        #joy-base { position: absolute; bottom: 30px; left: 30px; width: 130px; height: 130px; background: rgba(255,255,255,0.1); border: 2px solid #0ff; border-radius: 50%; z-index: 20; }
+        #joy-knob { position: absolute; top: 40px; left: 40px; width: 50px; height: 50px; background: #0ff; border-radius: 50%; box-shadow: 0 0 15px #0ff; }
 
-        /* Notifications */
-        #msg-overlay { 
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            color: #fff; font-size: 60px; font-family: 'Permanent Marker'; 
-            text-align: center; display: none; z-index: 1000; text-shadow: 0 0 30px #f0f;
-        }
+        #win-screen { position: fixed; inset: 0; background: rgba(0,0,0,0.8); color: #fff; display: none; align-items: center; justify-content: center; flex-direction: column; z-index: 500; font-size: 50px; text-shadow: 0 0 20px #0f0; }
     </style>
 </head>
 <body>
-    <div id="landscape-msg">ROTATE TO ENTER THE BLOCKVERSE</div>
-    
-    <div id="hud">
-        <div class="stat-group">
-            <div class="stat"><span class="stat-label">VULVIAN LEVEL</span><span class="stat-value" id="v-lvl">1</span></div>
-            <div class="stat"><span class="stat-label">STAGE</span><span class="stat-value" id="s-lvl">1</span></div>
-        </div>
-        <div id="hp-bar"><div id="hp-fill"></div></div>
-    </div>
+    <div id="lock"><h1>ROTATE SCREEN BRO!<br>SIGMAS PLAY HORIZONTAL</h1></div>
+    <div id="win-screen"><h1>THX BRO!</h1><p style="font-size: 20px;">VULVIAN LEVEL UP</p></div>
 
-    <div id="msg-overlay">THX BRO!</div>
-    
-    <div id="crosshair">
-        <div id="ch-v" class="ch-line"></div>
-        <div id="ch-h" class="ch-line"></div>
+    <div id="hud">
+        <div class="stat">VULVIAN LVL: <span id="vlvl">1</span></div>
+        <div id="hp-bg"><div id="hp-val"></div></div>
     </div>
 
     <div id="joy-base"><div id="joy-knob"></div></div>
-    <div id="jump-btn" class="action-btn">ALPHA<br>JUMP</div>
-    <div id="fire-btn" class="action-btn">SNOT BOLT</div>
+    <div id="jump-btn" class="btn">JUMP</div>
+    <div id="shoot-btn" class="btn">SNOT</div>
 
     <script src="https://unpkg.com/three@0.155.0/build/three.min.js"></script>
     <script>
-        /** THE VULVIAN ENGINE **/
-        let scene, camera, renderer, gun, clock;
-        let platforms = [], enemies = [], bullets = [], particles = [];
-        let hp = 100, stage = 1, vLvl = 1, gameActive = true, jumps = 0;
-        let boobi, cage, targetGoal;
-
-        const SENS = 0.8; 
-        let move = { f: 0, r: 0 }, look = { lon: 0, lat: 0 }, velY = 0;
-        let tData = { lookId: null, moveId: null, lx: 0, ly: 0 };
+        /** ENGINE INITIALIZATION **/
+        let scene, camera, renderer, clock, gun;
+        let platforms = [], enemies = [], bullets = [];
+        let vLvl = 1, hp = 100, isPlaying = true, jumps = 0, velY = 0;
+        let move = { x: 0, y: 0 }, look = { x: 0, y: 0 };
+        let touches = { move: null, look: null, lx: 0, ly: 0 };
+        let boobi, cage;
 
         init();
         animate();
 
+        function createStarBox() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512; canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#050010'; ctx.fillRect(0,0,512,512);
+            for(let i=0; i<200; i++) {
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(Math.random()*512, Math.random()*512, 2, 2);
+            }
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+            tex.repeat.set(5, 5);
+            return tex;
+        }
+
         function init() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x020005);
-            scene.fog = new THREE.FogExp2(0x020005, 0.02);
             clock = new THREE.Clock();
             
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+            // INCREASED FOV TO 90
+            camera = new THREE.PerspectiveCamera(90, window.innerWidth/window.innerHeight, 0.1, 1000);
+            
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
             document.body.appendChild(renderer.domElement);
 
-            const hemi = new THREE.HemisphereLight(0x4444ff, 0xff00ff, 0.6);
-            const point = new THREE.PointLight(0x00ff00, 1, 100);
-            point.position.set(0, 10, 0);
-            scene.add(hemi, point);
+            // SKYBOX
+            const skyGeo = new THREE.SphereGeometry(500, 32, 32);
+            const skyMat = new THREE.MeshBasicMaterial({ map: createStarBox(), side: THREE.BackSide });
+            scene.add(new THREE.Mesh(skyGeo, skyMat));
 
-            createVulvianArm();
-            buildWorld();
-            setupControls();
+            const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+            const sun = new THREE.DirectionalLight(0x00ff00, 1);
+            sun.position.set(5, 10, 5);
+            scene.add(ambient, sun);
 
-            window.addEventListener('resize', onWindowResize);
-        }
-
-        function createVulvianArm() {
+            // GUN
             gun = new THREE.Group();
-            const sleeve = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.8), new THREE.MeshStandardMaterial({color: 0x222222}));
-            sleeve.position.set(0.5, -0.4, -0.5);
-            
-            const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 1), new THREE.MeshStandardMaterial({color: 0x00ff00, emissive: 0x00ff00}));
-            barrel.position.set(0.5, -0.3, -1);
-            
-            gun.add(sleeve, barrel);
+            const gBody = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.7), new THREE.MeshStandardMaterial({color: 0x222222}));
+            const gMuzzle = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.2), new THREE.MeshStandardMaterial({color: 0x00ff00}));
+            gMuzzle.position.z = -0.4;
+            gun.add(gBody, gMuzzle);
+            gun.position.set(0.4, -0.3, -0.5);
             camera.add(gun);
             scene.add(camera);
+
+            generateLevel();
+            setupControls();
+            window.addEventListener('resize', onResize);
         }
 
-        function buildWorld() {
-            // Clean
+        function generateLevel() {
             platforms.forEach(p => scene.remove(p));
             enemies.forEach(e => scene.remove(e));
             if(cage) scene.remove(cage);
-            if(boobi) scene.remove(boobi);
-            platforms = []; enemies = []; gameActive = true;
-
+            platforms = []; enemies = [];
+            
             camera.position.set(0, 5, 0);
-            look.lon = 0; look.lat = 0;
+            isPlaying = true;
 
-            // Start Pad
-            spawnPlatform(0, 0, 0, 15, 15, 0x111111, true);
+            // Start
+            addBlock(0, 0, 0, 15, 15, 0x333333);
 
-            // Lore Parkour
-            let pCount = 5 + (stage * 2);
-            let zPos = -15;
-            let yPos = 0;
+            let z = -15;
+            let y = 0;
+            const count = 5 + (vLvl * 2);
 
-            for(let i=0; i<pCount; i++) {
-                let x = (Math.random() - 0.5) * (10 + stage);
-                yPos += (Math.random() - 0.2) * 3;
-                zPos -= 15 + (stage * 0.5);
-                spawnPlatform(x, yPos, zPos, 10, 10, 0x0033ff);
-                
-                if(i % 2 === 0) spawnBoobasta(x, yPos + 3, zPos);
+            for(let i=0; i<count; i++) {
+                let x = (Math.random()-0.5) * 12;
+                y += (Math.random()-0.2) * 3;
+                z -= 15;
+                addBlock(x, y, z, 10, 10, 0x0066ff);
+                if(i % 2 === 1) spawnMob(x, y+3, z);
             }
 
-            // The Rescue Platform
-            zPos -= 20;
-            spawnPlatform(0, yPos, zPos, 15, 15, 0xff0055, true);
-            spawnRescue(0, yPos + 2, zPos);
-            targetGoal = new THREE.Vector3(0, yPos + 2, zPos);
+            // Goal
+            z -= 20;
+            addBlock(0, y, z, 15, 15, 0xff0066);
+            spawnRescue(0, y+2, z);
         }
 
-        function spawnPlatform(x, y, z, w, d, col, isSafe = false) {
-            const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, 2, d), new THREE.MeshStandardMaterial({color: col, emissive: col, emissiveIntensity: 0.1}));
-            mesh.position.set(x, y, z);
-            mesh.userData.hitbox = { w: w/2 + 0.5, d: d/2 + 0.5 };
-            scene.add(mesh);
-            platforms.push(mesh);
+        function addBlock(x, y, z, w, d, col) {
+            const b = new THREE.Mesh(new THREE.BoxGeometry(w, 2, d), new THREE.MeshStandardMaterial({color: col, emissive: col, emissiveIntensity: 0.2}));
+            b.position.set(x, y, z);
+            // PROPER BOX HITBOX
+            b.userData.bounds = { xMin: x-w/2, xMax: x+w/2, zMin: z-d/2, zMax: z+d/2, y: y+1 };
+            scene.add(b);
+            platforms.push(b);
         }
 
-        function spawnBoobasta(x, y, z) {
-            const group = new THREE.Group();
-            const body = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2, 1), new THREE.MeshStandardMaterial({color: 0x444444}));
-            const eyes = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.2, 0.1), new THREE.MeshStandardMaterial({color: 0xff0000, emissive: 0xff0000}));
-            eyes.position.set(0, 0.5, 0.51);
-            group.add(body, eyes);
-            group.position.set(x, y, z);
-            group.userData = { hp: 2 + stage, speed: 0.04 + (stage * 0.01) };
-            scene.add(group);
-            enemies.push(group);
+        function spawnMob(x, y, z) {
+            const m = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshStandardMaterial({color: 0xff4400}));
+            m.position.set(x, y, z);
+            m.userData = { hp: 1 + vLvl, speed: 0.05 + (vLvl*0.01) };
+            scene.add(m);
+            enemies.push(m);
         }
 
         function spawnRescue(x, y, z) {
             cage = new THREE.Mesh(new THREE.BoxGeometry(5, 6, 5), new THREE.MeshStandardMaterial({color: 0xffffff, wireframe: true}));
-            cage.position.set(x, y + 1, z);
-            boobi = new THREE.Mesh(new THREE.BoxGeometry(1, 1.5, 1), new THREE.MeshStandardMaterial({color: 0xff0000}));
+            cage.position.set(x, y+2, z);
+            boobi = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2, 1), new THREE.MeshStandardMaterial({color: 0xff0000}));
             boobi.position.copy(cage.position);
             scene.add(cage, boobi);
         }
 
         function setupControls() {
             const joy = document.getElementById('joy-base'), knob = document.getElementById('joy-knob');
-            window.ontouchstart = e => {
+            
+            window.addEventListener('touchstart', e => {
                 for(let t of e.changedTouches) {
-                    if (t.clientX > window.innerWidth/2) { tData.lookId = t.identifier; tData.lx = t.clientX; tData.ly = t.clientY; }
                     let r = joy.getBoundingClientRect();
-                    if (t.clientX > r.left && t.clientX < r.right && t.clientY > r.top && t.clientY < r.bottom) tData.moveId = t.identifier;
-                }
-            };
-            window.ontouchmove = e => {
-                for(let t of e.changedTouches) {
-                    if (t.identifier === tData.lookId) {
-                        look.lon -= (t.clientX - tData.lx) * SENS;
-                        look.lat -= (t.clientY - tData.ly) * SENS;
-                        tData.lx = t.clientX; tData.ly = t.clientY;
-                    }
-                    if (t.identifier === tData.moveId) {
-                        let r = joy.getBoundingClientRect(), dx = t.clientX-(r.left+60), dy = t.clientY-(r.top+60);
-                        let d = Math.min(Math.sqrt(dx*dx+dy*dy), 50);
-                        let a = Math.atan2(dy, dx);
-                        knob.style.transform = `translate(${Math.cos(a)*d}px, ${Math.sin(a)*d}px)`;
-                        move.f = -Math.sin(a)*(d/50); move.r = Math.cos(a)*(d/50);
+                    if(t.clientX > r.left && t.clientX < r.right && t.clientY > r.top && t.clientY < r.bottom) {
+                        touches.move = t.identifier;
+                    } else if(!touches.look) {
+                        touches.look = t.identifier;
+                        touches.lx = t.clientX; touches.ly = t.clientY;
                     }
                 }
-            };
-            window.ontouchend = e => {
+            }, {passive: false});
+
+            window.addEventListener('touchmove', e => {
                 for(let t of e.changedTouches) {
-                    if (t.identifier === tData.moveId) { move.f = 0; move.r = 0; knob.style.transform = `translate(0,0)`; }
+                    if(t.identifier === touches.move) {
+                        let r = joy.getBoundingClientRect();
+                        let dx = t.clientX - (r.left + 65), dy = t.clientY - (r.top + 65);
+                        let dist = Math.min(Math.sqrt(dx*dx+dy*dy), 55);
+                        let angle = Math.atan2(dy, dx);
+                        knob.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
+                        move.x = Math.cos(angle) * (dist/55); move.y = -Math.sin(angle) * (dist/55);
+                    }
+                    if(t.identifier === touches.look) {
+                        look.x -= (t.clientX - touches.lx) * 0.25;
+                        look.y -= (t.clientY - touches.ly) * 0.25;
+                        touches.lx = t.clientX; touches.ly = t.clientY;
+                    }
                 }
-            };
-            document.getElementById('fire-btn').ontouchstart = e => { e.preventDefault(); fire(); };
-            document.getElementById('jump-btn').ontouchstart = e => { e.preventDefault(); if(jumps < 2) { velY = 0.32; jumps++; } };
+            }, {passive: false});
+
+            window.addEventListener('touchend', e => {
+                for(let t of e.changedTouches) {
+                    if(t.identifier === touches.move) { 
+                        touches.move = null; move.x = 0; move.y = 0; knob.style.transform = `translate(0,0)`;
+                    }
+                    if(t.identifier === touches.look) touches.look = null;
+                }
+            });
+
+            document.getElementById('jump-btn').ontouchstart = () => { if(jumps < 2) { velY = 0.35; jumps++; } };
+            document.getElementById('shoot-btn').ontouchstart = fire;
         }
 
         function fire() {
-            const b = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.5), new THREE.MeshBasicMaterial({color: 0x00ff00}));
+            const b = new THREE.Mesh(new THREE.SphereGeometry(0.2), new THREE.MeshBasicMaterial({color: 0x00ff00}));
             b.position.copy(camera.position);
             const dir = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
-            b.userData.v = dir.multiplyScalar(3);
+            b.userData.v = dir.multiplyScalar(2.5);
             scene.add(b); bullets.push(b);
-            
-            gun.position.z += 0.2;
-            setTimeout(() => gun.position.z = 0, 100);
-        }
-
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
         function animate() {
             requestAnimationFrame(animate);
-            if(!gameActive) return;
+            if(!isPlaying) return;
 
             // Rotation
-            look.lat = Math.max(-85, Math.min(85, look.lat));
+            look.y = Math.max(-85, Math.min(85, look.y));
             camera.rotation.order = 'YXZ';
-            camera.rotation.y = THREE.MathUtils.degToRad(look.lon);
-            camera.rotation.x = THREE.MathUtils.degToRad(look.lat);
+            camera.rotation.y = THREE.MathUtils.degToRad(look.x);
+            camera.rotation.x = THREE.MathUtils.degToRad(look.y);
 
             // Movement
-            let mDir = new THREE.Vector3(move.r, 0, -move.f).applyQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0), camera.rotation.y));
-            camera.position.add(mDir.multiplyScalar(0.25));
+            let forward = new THREE.Vector3(move.x, 0, -move.y).applyQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0), camera.rotation.y));
+            camera.position.add(forward.multiplyScalar(0.25));
 
-            // Physics & Collisions
+            // FIXED PHYSICS
             velY -= 0.016;
             camera.position.y += velY;
 
-            let grounded = false;
             platforms.forEach(p => {
-                let dx = Math.abs(camera.position.x - p.position.x);
-                let dz = Math.abs(camera.position.z - p.position.z);
-                if (dx < p.userData.hitbox.w && dz < p.userData.hitbox.d) {
-                    if (camera.position.y > p.position.y + 1 && camera.position.y < p.position.y + 3) {
-                        camera.position.y = p.position.y + 2;
-                        velY = 0; jumps = 0; grounded = true;
+                const b = p.userData.bounds;
+                if(camera.position.x > b.xMin && camera.position.x < b.xMax && 
+                   camera.position.z > b.zMin && camera.position.z < b.zMax) {
+                    if(camera.position.y > b.y && camera.position.y < b.y + 2) {
+                        camera.position.y = b.y + 0.8;
+                        velY = 0; jumps = 0;
                     }
                 }
             });
 
-            if(camera.position.y < -30) { 
-                hp -= 20; updateHUD(); 
-                camera.position.set(0, 10, 0); velY = 0;
-            }
+            if(camera.position.y < -40) { hp -= 25; camera.position.set(0, 10, 0); updateHUD(); }
 
-            // Enemies Logic
+            // Enemies
             enemies.forEach(e => {
                 let d = e.position.distanceTo(camera.position);
-                if(d < 20) {
+                if(d < 25) {
                     e.lookAt(camera.position.x, e.position.y, camera.position.z);
                     e.position.add(new THREE.Vector3().subVectors(camera.position, e.position).normalize().multiplyScalar(e.userData.speed));
-                    if(d < 2.2) { hp -= 0.4; updateHUD(); }
+                    if(d < 2) { hp -= 0.5; updateHUD(); }
                 }
             });
 
             // Bullets
-            for(let i=bullets.length-1; i>=0; i--) {
-                bullets[i].position.add(bullets[i].userData.v);
+            bullets.forEach((b, i) => {
+                b.position.add(b.userData.v);
                 enemies.forEach((e, j) => {
-                    if(bullets[i] && bullets[i].position.distanceTo(e.position) < 2) {
-                        e.userData.hp--;
-                        scene.remove(bullets[i]); bullets.splice(i,1);
-                        if(e.userData.hp <= 0) { scene.remove(e); enemies.splice(j,1); }
+                    if(b.position.distanceTo(e.position) < 2) {
+                        scene.remove(e); enemies.splice(j,1);
+                        scene.remove(b); bullets.splice(i,1);
                     }
                 });
-            }
+            });
 
-            // Crosshair Reaction
-            const ray = new THREE.Raycaster(camera.position, new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion));
-            const hits = ray.intersectObjects(enemies, true);
-            document.getElementById('crosshair').style.filter = hits.length > 0 ? "hue-rotate(90deg) scale(1.5)" : "none";
+            // Boobi Animation
+            if(boobi) boobi.position.y += Math.sin(Date.now()*0.005)*0.01;
 
-            // Win Trigger
-            if(boobi && camera.position.distanceTo(targetGoal) < 5) {
-                victory();
-            }
+            if(boobi && camera.position.distanceTo(boobi.position) < 5) win();
 
             renderer.render(scene, camera);
         }
 
         function updateHUD() {
-            document.getElementById('hp-fill').style.width = hp + "%";
-            if(hp <= 0) { alert("VULVIAN HAS FALLEN. RESTARTING..."); location.reload(); }
+            document.getElementById('hp-val').style.width = hp + "%";
+            if(hp <= 0) { alert("GRIND OVER. TRY AGAIN."); location.reload(); }
         }
 
-        function victory() {
-            gameActive = false;
-            stage++; vLvl++;
-            document.getElementById('v-lvl').innerText = vLvl;
-            document.getElementById('s-lvl').innerText = stage;
-            
-            const msg = document.getElementById('msg-overlay');
-            msg.style.display = 'block';
-            
-            // Dramatic slowdown
+        function win() {
+            isPlaying = false;
+            vLvl++;
+            document.getElementById('vlvl').innerText = vLvl;
+            document.getElementById('win-screen').style.display = 'flex';
             setTimeout(() => {
-                msg.style.display = 'none';
-                buildWorld();
-            }, 2500);
+                document.getElementById('win-screen').style.display = 'none';
+                generateLevel();
+            }, 2000);
+        }
+
+        function onResize() {
+            camera.aspect = window.innerWidth/window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         }
     </script>
 </body>
