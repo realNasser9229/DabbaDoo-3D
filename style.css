@@ -1,13 +1,17 @@
 body {
     margin: 0;
     overflow: hidden;
-    background: #111;
-    font-family: sans-serif;
-    color: white;
+    background: #000; /* Pure black for loading */
+    font-family: 'Courier New', Courier, monospace;
+    color: #00ff00;
 }
 
 canvas {
     display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
 }
 
 #loading {
@@ -15,4 +19,8 @@ canvas {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    z-index: 10;
+    text-align: center;
+    pointer-events: none; /* Let clicks pass through to the game */
+    text-shadow: 0 0 10px #00ff00;
 }
