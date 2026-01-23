@@ -3,293 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DABBADOO: BROTHER RESCUE - CSGO EDITION</title>
+    <title>DABBADOO DELUXE - Dr. RagorGaming Edition</title>
     <style>
         body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Courier New', Courier, monospace; }
         #ui { position: absolute; top: 20px; left: 20px; color: #fff; z-index: 100; pointer-events: none; }
         .stat { font-size: 28px; font-weight: 900; text-shadow: 3px 3px #f00; letter-spacing: 1px; color: #0f0; margin-bottom: 5px; }
-        #money { color: #ff0; }
-        #round { color: #f0f; }
-        #cake-warning { position: absolute; top: 10%; width: 100%; text-align: center; color: #f00; font-weight: bold; font-size: 20px; opacity: 0.7; pointer-events: none; animation: flicker 2s infinite; }
-        @keyframes flicker { 0%,100% { opacity: 0.7; } 50% { opacity: 0.3; } }
-
-        /* CS:GO style crosshair */
-        #crosshair { position: absolute; top: 50%; left: 50%; width: 30px; height: 30px; transform: translate(-50%, -50%); z-index: 50; pointer-events: none; }
-        #crosshair::before, #crosshair::after { content: ''; position: absolute; background: #0f0; }
-        #crosshair::before { width: 100%; height: 2px; top: 14px; }
-        #crosshair::after { width: 2px; height: 100%; left: 14px; }
-
-        /* Buy menu overlay */
-        #buy-menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; display: none; flex-direction: column; align-items: center; justify-content: center; color: #0f0; font-size: 32px; }
-        .buy-item { margin: 20px; padding: 20px; background: rgba(255,255,255,0.1); border: 3px solid #0f0; cursor: pointer; pointer-events: all; }
+        #cake-warning { position: absolute; top: 10%; width: 100%; text-align: center; color: #f00; font-weight: bold; font-size: 20px; opacity: 0.5; pointer-events: none; }
+        
+        /* Crosshair */
+        #crosshair { position: absolute; top: 50%; left: 50%; width: 40px; height: 40px; border: 2px solid #0f0; transform: translate(-50%, -50%); z-index: 50; }
+        #crosshair:before { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: #0f0; }
+        #crosshair:after { content: ''; position: absolute; left: 50%; top: 0; width: 2px; height: 100%; background: #0f0; }
 
         /* Buttons */
-        .btn { position: absolute; border-radius: 50%; background: rgba(50,50,50,0.9); border: 4px solid #fff; display: flex; align-items: center; justify-content: center; color: #fff; z-index: 100; font-weight: bold; text-shadow: 2px 2px #000; }
-        #joy-base { width: 140px; height: 140px; bottom: 40px; left: 40px; background: rgba(255,255,255,0.1); border: 3px solid #555; border-radius: 50%; position: absolute; }
-        #joy-knob { width: 70px; height: 70px; background: #f00; border-radius: 50%; position: absolute; top: 35px; left: 35px; box-shadow: 0 0 30px #f00; transition: transform 0.05s; }
-
-        #jump-btn { width: 100px; height: 100px; bottom: 200px; right: 40px; background: #00f; font-size: 18px; }
-        #shoot-btn { width: 140px; height: 140px; bottom: 20px; right: 30px; font-size: 28px; background: #f00; border-color: #ff0; animation: pulse 0.8s infinite; }
-
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
-
-        #reload-msg { position: absolute; bottom: 30%; left: 50%; transform: translateX(-50%); color: #0f0; font-size: 48px; font-weight: 900; display: none; text-shadow: 0 0 30px #0f0; animation: bounce 0.5s infinite; }
-        @keyframes bounce { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-20px); } }
-
-        #win-msg, #lose-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #0ff; font-size: 60px; font-weight: 900; text-shadow: 0 0 40px #0ff; display: none; z-index: 200; animation: winpulse 1s infinite; }
-        @keyframes winpulse { 0% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.2); } 100% { transform: translate(-50%, -50%) scale(1); } }
+        .btn { position: absolute; border-radius: 10px; background: rgba(50,50,50,0.8); border: 4px solid #fff; display: flex; align-items: center; justify-content: center; color: #fff; z-index: 100; font-weight: bold; }
+        #joy-base { width: 130px; height: 130px; bottom: 40px; left: 40px; background: rgba(255,255,255,0.1); border: 2px solid #555; border-radius: 50%; position: absolute; }
+        #joy-knob { width: 60px; height: 60px; background: #f00; border-radius: 50%; position: absolute; top: 35px; left: 35px; box-shadow: 0 0 20px #f00; }
+        
+        #jump-btn { width: 90px; height: 90px; bottom: 160px; right: 40px; background: #00f; }
+        #shoot-btn { width: 130px; height: 130px; bottom: 20px; right: 30px; font-size: 24px; background: #f00; border-color: #ff0; animation: pulse 0.5s infinite; }
+        
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        
+        #reload-msg { position: absolute; bottom: 30%; left: 50%; transform: translateX(-50%); color: #0f0; font-size: 40px; font-weight: 900; display: none; text-shadow: 0 0 20px #0f0; }
     </style>
 </head>
 <body>
     <div id="cake-warning">THE CAKE IS A LIE. THE CAKE IS A LIE.</div>
     <div id="ui">
-        <div class="stat">ROUND: <span id="round">1</span></div>
-        <div class="stat" id="money">CASH: $<span id="cash">3200</span></div>
-        <div class="stat">KILLS: <span id="kills">0</span></div>
-        <div class="stat">AMMO: <span id="am">30/90</span></div>
-        <div class="stat" style="color: #0ff;">OBJECTIVE: RESCUE BROTHER</div>
+        <div class="stat">SIGMA SCORE: <span id="sc">0</span></div>
+        <div class="stat">AMMO: <span id="am">12/12</span></div>
+        <div class="stat" style="color: #0ff;">BROTHER STATUS: CAPTURED</div>
     </div>
-
-    <div id="buy-menu">
-        <div style="font-size: 48px; margin-bottom: 40px;">BUY TIME - $<span id="buy-cash">3200</span></div>
-        <div class="buy-item" data-cost="0" data-action="skip">SKIP BUY</div>
-        <div class="buy-item" data-cost="700" data-action="armor">KEVLAR + HELMET ($1000)</div>
-        <div class="buy-item" data-cost="2700" data-action="ak">AK-47 ($2700)</div>
-        <div class="buy-item" data-cost="4750" data-action="awp">AWP ($4750)</div>
-        <div class="buy-item" data-cost="200" data-action="grenade">SPINACH GRENADE ($200)</div>
-    </div>
-
+    
     <div id="reload-msg">SNEEZING DABBADOO...</div>
-    <div id="win-msg">BROTHER RESCUED<br>THX BRO<br>VULVIAN WINS ROUND</div>
-    <div id="lose-msg">BOOBASTAS WIN<br>TRY AGAIN SIGMA</div>
     <div id="crosshair"></div>
     <div id="joy-base"><div id="joy-knob"></div></div>
-    <div id="jump-btn" class="btn">JUMP</div>
-    <div id="shoot-btn" class="btn">FIRE</div>
+    <div id="jump-btn" class="btn">DOUBLE<br>JUMP</div>
+    <div id="shoot-btn" class="btn">GRIND</div>
 
     <script src="https://unpkg.com/three@0.155.0/build/three.min.js"></script>
     <script>
-        let scene, camera, renderer, gun, clock;
-        let bullets = [], enemies = [], grenades = [], snotParticles = [];
-        let score = 0, kills = 0, ammo = 30, maxAmmo = 90, money = 3200, round = 1;
-        let reloading = false, jumps = 0, hasArmor = false, gunType = 'pistol', recoil = 0;
-        let brotherBarrier = null, brotherSaved = false, roundActive = false;
-
-        const SENSITIVITY = 0.4;
+        let scene, camera, renderer, gun, clock, shake = 0.05;
+        let bullets = [], enemies = [], snotParticles = [];
+        let score = 0, ammo = 12, reloading = false, jumps = 0;
+        
+        const SENSITIVITY = 0.35;
         let move = { f: 0, r: 0 }, look = { lon: 0, lat: 0 }, velY = 0;
         let tData = { lookId: null, moveId: null, lx: 0, ly: 0 };
 
         init();
-        startBuyPhase();
+        animate();
+
+        function createFaceTexture(isEvil) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64; canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = 'white'; ctx.fillRect(0,0,64,64);
+            ctx.fillStyle = 'black';
+            // Eyes
+            ctx.fillRect(15, 20, 8, 8); ctx.fillRect(40, 20, 8, 8);
+            // Smirk
+            ctx.beginPath();
+            if(isEvil) { ctx.moveTo(15, 45); ctx.lineTo(50, 40); } 
+            else { ctx.moveTo(15, 45); ctx.lineTo(50, 45); }
+            ctx.lineWidth = 4; ctx.stroke();
+            return new THREE.CanvasTexture(canvas);
+        }
 
         function init() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x222233);
-            scene.fog = new THREE.FogExp2(0x222233, 0.02);
+            scene.background = new THREE.Color(0x050505);
+            scene.fog = new THREE.Fog(0x000000, 10, 100);
             clock = new THREE.Clock();
-
-            camera = new THREE.PerspectiveCamera(80, window.innerWidth/window.innerHeight, 0.1, 200);
-            camera.position.set(0, 1.7, 0);
-
-            renderer = new THREE.WebGLRenderer({ antialias: false });
-            renderer.setPixelRatio(window.devicePixelRatio);
+            
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: false }); // Crunchy pixel look
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
 
-            const light = new THREE.DirectionalLight(0xffffff, 1.5);
-            light.position.set(5, 15, 10);
-            scene.add(light, new THREE.AmbientLight(0x606060, 1));
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(5, 10, 7);
+            scene.add(light, new THREE.AmbientLight(0x404040));
 
-            // Ground
-            const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({color: 0x333344}));
-            ground.rotation.x = -Math.PI/2;
-            ground.position.y = -0.1;
-            scene.add(ground);
+            // Platforms
+            const grid = new THREE.GridHelper(200, 40, 0xff0000, 0x222222);
+            scene.add(grid);
 
-            // Platforms for CS:GO feel
-            for(let i = 0; i < 40; i++) {
-                const plat = new THREE.Mesh(new THREE.BoxGeometry(10 + Math.random()*20, 0.5, 10 + Math.random()*20), new THREE.MeshStandardMaterial({color: 0x444455}));
-                plat.position.set(Math.random()*100-50, Math.random()*3, Math.random()*-100-20);
-                scene.add(plat);
-            }
+            // Vulvian's Blocky Hands
+            const handMat = new THREE.MeshStandardMaterial({color: 0xffffff});
+            const leftHand = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.4), handMat);
+            leftHand.position.set(-0.5, -0.4, -0.6);
+            camera.add(leftHand);
 
-            // Brother barrier at bombsite
-            brotherBarrier = new THREE.Mesh(new THREE.BoxGeometry(6, 8, 1), new THREE.MeshStandardMaterial({color: 0x888888, transparent: true, opacity: 0.6}));
-            brotherBarrier.position.set(0, 4, -80);
-            scene.add(brotherBarrier);
-
-            const boobi = new THREE.Group();
-            const boobiBody = new THREE.Mesh(new THREE.BoxGeometry(2, 3, 1), new THREE.MeshStandardMaterial({color: 0x3366ff}));
-            const boobiHead = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 1.5), new THREE.MeshStandardMaterial({color: 0xffd700}));
-            boobiHead.position.y = 2;
-            const flower = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.2), new THREE.MeshStandardMaterial({color: 0xffff00}));
-            flower.position.set(0, 3.2, 0);
-            boobi.add(boobiBody, boobiHead, flower);
-            boobi.position.set(0, 1, -79.5);
-            scene.add(boobi);
-
-            // Gun (starts as Glock, upgrades to AK/AWP)
+            // The Gun
             gun = new THREE.Group();
-            updateGunModel();
-            gun.position.set(0.4, -0.4, -0.8);
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.2, 0.8), new THREE.MeshStandardMaterial({color: 0x111111}));
+            const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.5), new THREE.MeshStandardMaterial({color: 0x333333}));
+            barrel.rotation.x = Math.PI/2; barrel.position.z = -0.5;
+            gun.add(body, barrel);
+            gun.position.set(0.4, -0.3, -0.7);
             camera.add(gun);
             scene.add(camera);
 
+            for(let i=0; i<10; i++) spawnBoobasta();
             setupTouch();
-            setupBuyMenu();
-        }
-
-        function updateGunModel() {
-            gun.clear();
-            let color = gunType === 'awp' ? 0x00ff00 : gunType === 'ak' ? 0xff0000 : 0x888888;
-            const gunBody = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.25, gunType === 'awp' ? 1.5 : 1), new THREE.MeshStandardMaterial({color}));
-            const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, gunType === 'awp' ? 1.2 : 0.8), new THREE.MeshStandardMaterial({color: 0x111111}));
-            barrel.rotation.x = Math.PI/2; barrel.position.z = gunType === 'awp' ? -0.9 : -0.6;
-            gun.add(gunBody, barrel);
         }
 
         function spawnBoobasta() {
             const boobasta = new THREE.Group();
-            const body = new THREE.Mesh(new THREE.BoxGeometry(1.8, 3, 1), new THREE.MeshStandardMaterial({color: 0x666666}));
-            const head = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.4, 1.4), new THREE.MeshStandardMaterial({color: 0xffffff}));
-            head.position.y = 2.2;
-            boobasta.add(body, head);
-            boobasta.position.set(Math.random()*80-40, 1.5, Math.random()*-80-20);
-            boobasta.userData = { health: 100, speed: 0.08 };
+            const body = new THREE.Mesh(new THREE.BoxGeometry(1, 1.5, 0.6), new THREE.MeshStandardMaterial({color: 0x888888}));
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.7), new THREE.MeshStandardMaterial({map: createFaceTexture(true)}));
+            head.position.y = 1.1;
+            const armL = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1, 0.4), new THREE.MeshStandardMaterial({color: 0x888888}));
+            armL.position.set(-0.7, 0.2, 0); armL.rotation.z = 1.2; // T-Pose energy
+            const armR = armL.clone(); armR.position.x = 0.7; armR.rotation.z = -1.2;
+            
+            boobasta.add(body, head, armL, armR);
+            boobasta.position.set(Math.random()*80-40, 0.75, Math.random()*-80-10);
             scene.add(boobasta);
             enemies.push(boobasta);
         }
 
-        function startBuyPhase() {
-            document.getElementById('buy-menu').style.display = 'flex';
-            document.getElementById('buy-cash').innerText = money;
-            roundActive = false;
+        function spawnSnot() {
+            for(let i=0; i<5; i++) {
+                const p = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({color: 0x00ff00}));
+                p.position.copy(camera.position).add(new THREE.Vector3(0,-0.2,-0.5).applyQuaternion(camera.quaternion));
+                p.userData.v = new THREE.Vector3((Math.random()-0.5)*0.1, 0.1, (Math.random()-0.5)*0.1);
+                p.userData.life = 1.0;
+                scene.add(p); snotParticles.push(p);
+            }
         }
 
-        function startRound() {
-            document.getElementById('buy-menu').style.display = 'none';
-            document.getElementById('round').innerText = round;
-            enemies.forEach(e => scene.remove(e));
-            enemies = [];
-            for(let i = 0; i < round * 5 + 10; i++) spawnBoobasta();
-            roundActive = true;
-            brotherSaved = false;
-            document.getElementById('brother-status').innerText = "NEEDS RESCUE";
-        }
-
-        function setupBuyMenu() {
-            document.querySelectorAll('.buy-item').forEach(item => {
-                item.onclick = () => {
-                    const cost = parseInt(item.dataset.cost);
-                    if(money >= cost) {
-                        money -= cost;
-                        document.getElementById('cash').innerText = money;
-                        document.getElementById('buy-cash').innerText = money;
-                        switch(item.dataset.action) {
-                            case 'armor': hasArmor = true; break;
-                            case 'ak': gunType = 'ak'; ammo = 30; maxAmmo = 90; break;
-                            case 'awp': gunType = 'awp'; ammo = 10; maxAmmo = 30; break;
-                        }
-                        updateGunModel();
+        function setupTouch() {
+            const joy = document.getElementById('joy-base'), knob = document.getElementById('joy-knob');
+            window.ontouchstart = e => {
+                for(let t of e.changedTouches) {
+                    if (t.clientX > window.innerWidth/2) { tData.lookId = t.identifier; tData.lx = t.clientX; tData.ly = t.clientY; }
+                    let r = joy.getBoundingClientRect();
+                    if (t.clientX > r.left && t.clientX < r.right && t.clientY > r.top && t.clientY < r.bottom) tData.moveId = t.identifier;
+                }
+            };
+            window.ontouchmove = e => {
+                for(let t of e.changedTouches) {
+                    if (t.identifier === tData.lookId) {
+                        look.lon -= (t.clientX - tData.lx) * SENSITIVITY;
+                        look.lat -= (t.clientY - tData.ly) * SENSITIVITY;
+                        tData.lx = t.clientX; tData.ly = t.clientY;
                     }
-                };
-            });
-            document.querySelector('.buy-item[data-action="skip"]').onclick = startRound;
+                    if (t.identifier === tData.moveId) {
+                        let r = joy.getBoundingClientRect(), dx = t.clientX-(r.left+65), dy = t.clientY-(r.top+65);
+                        let d = Math.min(Math.sqrt(dx*dx+dy*dy), 60), a = Math.atan2(dy, dx);
+                        knob.style.transform = `translate(${Math.cos(a)*d}px, ${Math.sin(a)*d}px)`;
+                        move.f = -Math.sin(a)*(d/60); move.r = Math.cos(a)*(d/60);
+                    }
+                }
+            };
+            window.ontouchend = e => {
+                for(let t of e.changedTouches) {
+                    if (t.identifier === tData.lookId) tData.lookId = null;
+                    if (t.identifier === tData.moveId) { tData.moveId = null; move.f = 0; move.r = 0; knob.style.transform = `translate(0,0)`; }
+                }
+            };
+            document.getElementById('shoot-btn').ontouchstart = e => { e.preventDefault(); shoot(); };
+            document.getElementById('jump-btn').ontouchstart = e => { 
+                e.preventDefault(); 
+                if(jumps < 2) { 
+                    velY = 0.25; jumps++; 
+                    // Halo glow effect
+                    const halo = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.05), new THREE.MeshBasicMaterial({color: 0xffff00}));
+                    halo.position.copy(camera.position).y -= 1;
+                    halo.rotation.x = Math.PI/2;
+                    scene.add(halo);
+                    setTimeout(() => scene.remove(halo), 200);
+                } 
+            };
         }
 
         function shoot() {
-            if(reloading || ammo <= 0 || !roundActive) return;
-            ammo--; document.getElementById('am').innerText = ammo + "/" + maxAmmo;
-
-            const b = new THREE.Mesh(new THREE.SphereGeometry(0.15), new THREE.MeshBasicMaterial({color: 0xffff00}));
-            b.position.copy(gun.position).applyQuaternion(camera.quaternion);
-            let spread = gunType === 'awp' ? 0.01 : gunType === 'ak' ? 0.08 : 0.05;
-            let dir = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
-            dir.add(new THREE.Vector3((Math.random()-0.5)*spread, (Math.random()-0.5)*spread, 0));
-            b.userData.v = dir.multiplyScalar(gunType === 'awp' ? 4 : 3);
+            if (reloading || ammo <= 0) return;
+            ammo--; document.getElementById('am').innerText = ammo + "/12";
+            
+            const b = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.2), new THREE.MeshBasicMaterial({color: 0xffff00}));
+            b.position.copy(camera.position);
+            b.userData.v = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion).multiplyScalar(1.5);
             scene.add(b); bullets.push(b);
 
-            // CS:GO recoil
-            recoil += gunType === 'ak' ? 0.3 : 0.1;
-            look.lat -= recoil;
-            gun.rotation.z = (Math.random()-0.5)*0.2;
-
-            setTimeout(() => { gun.rotation.z = 0; recoil *= 0.8; }, 100);
-
+            gun.position.z = -0.5; // Kickback
+            setTimeout(() => gun.position.z = -0.7, 50);
+            
             if(ammo === 0) doReload();
         }
 
         function doReload() {
             reloading = true;
             document.getElementById('reload-msg').style.display = 'block';
+            let interval = setInterval(spawnSnot, 100);
             setTimeout(() => {
-                ammo = maxAmmo;
-                document.getElementById('am').innerText = ammo + "/" + maxAmmo;
-                reloading = false;
+                clearInterval(interval);
+                ammo = 12; reloading = false;
+                document.getElementById('am').innerText = "12/12";
                 document.getElementById('reload-msg').style.display = 'none';
-            }, 2000);
-        }
-
-        function checkRoundEnd() {
-            if(brotherSaved) {
-                document.getElementById('win-msg').style.display = 'block';
-                money += 3250;
-                round++;
-                setTimeout(startBuyPhase, 3000);
-            } else if(enemies.length === 0 && roundActive) {
-                brotherSaved = true; // Auto-win if all dead
-                checkRoundEnd();
-            }
+            }, 1500);
         }
 
         function animate() {
             requestAnimationFrame(animate);
-            const delta = clock.getDelta();
-
-            // Movement
+            const time = performance.now() * 0.002;
+            
+            // Look & Movement
+            look.lat = Math.max(-85, Math.min(85, look.lat));
             camera.rotation.order = 'YXZ';
             camera.rotation.y = THREE.MathUtils.degToRad(look.lon);
             camera.rotation.x = THREE.MathUtils.degToRad(look.lat);
 
-            camera.translateZ(move.f * delta * 20);
-            camera.translateX(move.r * delta * 20);
-
-            // Gravity & jump
-            camera.position.y += velY * delta * 20;
-            velY -= 0.5 * delta * 20;
-            if(camera.position.y <= 1.7) { camera.position.y = 1.7; velY = 0; jumps = 0; }
-
-            // Earthquake
+            camera.translateZ(-move.f * 0.2); camera.translateX(move.r * 0.2);
+            
+            // Earthquake SFX (Visual)
             camera.position.x += (Math.random()-0.5) * 0.02;
             camera.position.z += (Math.random()-0.5) * 0.02;
 
-            // Boobasta chase
-            enemies.forEach(e => {
-                const dir = camera.position.clone().sub(e.position).normalize();
-                e.position.add(dir.multiplyScalar(e.userData.speed * 30 * delta));
-                e.lookAt(camera.position);
+            // Gravity
+            camera.position.y += velY;
+            if(camera.position.y > 1.7) velY -= 0.012; 
+            else { camera.position.y = 1.7; velY = 0; jumps = 0; }
+
+            // Gun Bob
+            gun.position.y = -0.3 + Math.sin(time*10)*0.01;
+
+            // Particles & Bullets
+            snotParticles.forEach((p, i) => {
+                p.position.add(p.userData.v); p.userData.life -= 0.02;
+                if(p.userData.life <= 0) { scene.remove(p); snotParticles.splice(i,1); }
             });
 
-            // Bullets
             for(let i=bullets.length-1; i>=0; i--) {
-                const b = bullets[i];
-                b.position.add(b.userData.v.clone().multiplyScalar(delta * 50));
+                bullets[i].position.add(bullets[i].userData.v);
                 enemies.forEach((e, j) => {
-                    if(b.position.distanceTo(e.position) < 2) {
-                        scene.remove(e); enemies.splice(j,1);
-                        kills++; document.getElementById('kills').innerText = kills;
-                        money += 300;
-                        document.getElementById('cash').innerText = money;
+                    if(bullets[i].position.distanceTo(e.position) < 1.5) {
+                        scene.remove(e); enemies.splice(j, 1);
+                        scene.remove(bullets[i]); bullets.splice(i,1);
+                        score += 100; document.getElementById('sc').innerText = score;
                         spawnBoobasta();
                     }
                 });
-                if(b.position.length() > 200) { scene.remove(b); bullets.splice(i,1); }
-            }
-
-            // Win check
-            if(roundActive && camera.position.distanceTo(brotherBarrier.position) < 8) {
-                brotherSaved = true;
-                checkRoundEnd();
+                if(bullets[i] && bullets[i].position.length() > 200) { scene.remove(bullets[i]); bullets.splice(i,1); }
             }
 
             renderer.render(scene, camera);
