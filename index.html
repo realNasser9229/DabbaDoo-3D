@@ -407,4 +407,164 @@
                     if(t.identifier === touches.look) {
                         look.x -= (t.clientX - touches.lx) * 0.3;
                         look.y -= (t.clientY - touches.ly) * 0.3;
-   
+                        touches.lx = t.clientX; touches.ly = t.clientY;
+                    }
+                }
+            }, {passive: false});
+
+            const end = (id) => {
+                if(id===touches.move) { touches.move=null; move.x=0; move.y=0; knob.style.transform='translate(0,0)'; }
+                if(id===touches.look) touches.look=null;
+            };
+            window.addEventListener('touchend', e => { for(let t of e.changedTouches) end(t.identifier); });
+            
+            document.getElementById('jump-btn').ontouchstart = (e) => { 
+                e.preventDefault(); 
+                if(jumps < 2) { velY = 0.45; jumps++; AudioSys.jump(); }
+            };
+            document.getElementById('shoot-btn').ontouchstart = (e) => { e.preventDefault(); fire(); };
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if(!isPlaying) return;
+
+            // 1. Earthquake / Screenshake
+            let shakeX = 0, shakeY = 0;
+            if(screenShake > 0) {
+                shakeX = (Math.random()-0.5) * screenShake;
+                shakeY = (Math.random()-0.5) * screenShake;
+                screenShake *= 0.9;
+            }
+            // Constant platform shake
+            platforms.forEach(p => {
+                p.position.x = p.userData.origX + Math.sin(Date.now()*0.02)*0.05;
+            });
+
+            // 2. Camera Controls
+            look.y = Math.max(-85, Math.min(85, look.y));
+            const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+            euler.x = THREE.MathUtils.degToRad(look.y);
+            euler.y = THREE.MathUtils.degToRad(look.x);
+            camera.quaternion.setFromEuler(euler);
+            
+            const fwd = new THREE.Vector3(0,0,-1).applyAxisAngle(new THREE.Vector3(0,1,0), euler.y);
+            const rgt = new THREE.Vector3(1,0,0).applyAxisAngle(new THREE.Vector3(0,1,0), euler.y);
+            camera.position.add(fwd.multiplyScalar(move.y * 0.25));
+            camera.position.add(rgt.multiplyScalar(move.x * 0.25));
+
+            // Gravity
+            velY -= 0.015;
+            camera.position.y += velY;
+            camera.position.x += shakeX;
+            camera.position.y += shakeY;
+
+            // Floor Collision
+            platforms.forEach(p => {
+                const b = p.userData.bounds;
+                if(camera.position.x > b.xMin && camera.position.x < b.xMax && 
+                   camera.position.z > b.zMin && camera.position.z < b.zMax) {
+                    if(camera.position.y > b.yTop && camera.position.y < b.yTop + 2.5 && velY <= 0) {
+                        camera.position.y = b.yTop + 1.2;
+                        velY = 0; jumps = 0;
+                    }
+                }
+            });
+
+            // Void Death
+            if(camera.position.y < -30) { hp=0; updateHUD(); }
+
+            // 3. Gun Anim
+            gunRecoil *= 0.8;
+            gun.position.z = -0.2 + gunRecoil;
+            muzzleLight.intensity *= 0.5;
+
+            // 4. Enemy Logic (Boobastas)
+            enemies.forEach(e => {
+                let dist = e.position.distanceTo(camera.position);
+                if(dist < 50) {
+                    e.lookAt(camera.position.x, e.position.y, camera.position.z);
+                    e.position.add(new THREE.Vector3(0,0,1).applyQuaternion(e.quaternion).multiplyScalar(e.userData.speed));
+                    if(dist < 2) { hp -= 2; screenShake = 0.5; updateHUD(); }
+                }
+            });
+
+            // 5. Bullets & Collisions
+            for(let i=bullets.length-1; i>=0; i--) {
+                let b = bullets[i];
+                b.position.add(b.userData.v);
+                
+                // Hit Enemy
+                let hit = false;
+                for(let j=enemies.length-1; j>=0; j--) {
+                    if(b.position.distanceTo(enemies[j].position) < 1.5) {
+                        createExplosion(enemies[j].position, 0x888888); // Gray confetti
+                        scene.remove(enemies[j]); enemies.splice(j,1);
+                        hit = true; break;
+                    }
+                }
+                
+                // Hit Barrier (Cage)
+                if(!hit && cage && b.position.distanceTo(cage.position) < 5) {
+                    cage.userData.hp--;
+                    createExplosion(b.position, 0x555555);
+                    cage.scale.multiplyScalar(0.98); // Shrink it
+                    if(cage.userData.hp <= 0) {
+                        scene.remove(cage); cage = null;
+                        createExplosion(new THREE.Vector3(0,5,-40), 0xffffff);
+                    }
+                    hit = true;
+                }
+
+                if(hit || b.position.distanceTo(camera.position) > 80) {
+                    scene.remove(b); bullets.splice(i,1);
+                }
+            }
+
+            // 6. Particles
+            for(let i=particles.length-1; i>=0; i--) {
+                let p = particles[i];
+                p.position.add(p.userData.vel);
+                p.userData.vel.y -= 0.02;
+                p.rotation.x += 0.2;
+                p.userData.life -= 0.05;
+                p.scale.setScalar(p.userData.life);
+                if(p.userData.life <= 0) { scene.remove(p); particles.splice(i,1); }
+            }
+
+            // 7. Win Condition
+            if(!cage && brother && camera.position.distanceTo(brother.position) < 5) {
+                win();
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function createExplosion(pos, col) {
+            AudioSys.boom();
+            for(let i=0; i<15; i++) spawnParticle(pos, col);
+        }
+
+        function updateHUD() {
+            document.getElementById('hp-txt').innerText = Math.max(0, Math.floor(hp));
+            if(hp <= 0) {
+                isPlaying = false;
+                alert("OOF! VULVIAN DOWN. THE CAKE WAS A LIE. RELOADING...");
+                location.reload();
+            }
+        }
+
+        function win() {
+            isPlaying = false;
+            brother.userData.bubble.visible = true; // "Thx bro"
+            document.getElementById('win-screen').style.display = 'flex';
+        }
+
+        function onResize() {
+            camera.aspect = window.innerWidth/window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+    </script>
+</body>
+</html>
