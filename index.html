@@ -3,42 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DABBADOO: FINAL SIGMA - UPGRADED</title>
+    <title>DABBADOO: FINAL SIGMA - ENHANCED EDITION</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap');
         body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Black Ops One', system-ui; }
         
         /* Orientation Force */
-        #lock { position: fixed; inset: 0; background: #000; color: #f00; z-index: 1000; display: none; align-items: center; justify-content: center; text-align: center; border: 10px solid #f00; }
+        #lock { position: fixed; inset: 0; background: #000; color: #f00; z-index: 1000; display: none; align-items: center; justify-content: center; text-align: center; border: 10px solid #f00; animation: pulse 1.5s infinite; }
         @media (orientation: portrait) { #lock { display: flex; } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        /* HUD */
-        #hud { position: absolute; top: 20px; left: 20px; z-index: 10; pointer-events: none; }
-        .stat { color: #0f0; font-size: 22px; text-shadow: 2px 2px #000; margin-bottom: 5px; }
-        #hp-bg { width: 200px; height: 12px; background: rgba(0,0,0,0.5); border: 2px solid #fff; }
-        #hp-val { width: 100%; height: 100%; background: #f00; transition: 0.2s; }
-        #score { position: absolute; top: 20px; right: 20px; color: #ff0; font-size: 22px; text-shadow: 2px 2px #000; z-index: 10; pointer-events: none; }
+        /* HUD - Improved with Glow and Layout */
+        #hud { position: absolute; top: 20px; left: 20px; z-index: 10; pointer-events: none; text-shadow: 0 0 10px #0f0; }
+        .stat { color: #0f0; font-size: 26px; margin-bottom: 8px; letter-spacing: 1px; }
+        #hp-bg { width: 250px; height: 18px; background: rgba(0,0,0,0.6); border: 3px solid #f00; border-radius: 8px; overflow: hidden; box-shadow: 0 0 15px #f00; }
+        #hp-val { width: 100%; height: 100%; background: linear-gradient(to right, #f00, #ff8000); transition: width 0.3s ease; }
 
-        /* Buttons */
-        .btn { position: absolute; z-index: 20; border-radius: 50%; border: 3px solid #fff; color: #fff; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); font-size: 14px; }
-        #jump-btn { bottom: 120px; right: 40px; width: 80px; height: 80px; background: #4400ff; }
-        #shoot-btn { bottom: 20px; right: 30px; width: 110px; height: 110px; background: #ff0044; border-color: #ff0; font-size: 20px; }
+        #score { position: absolute; top: 20px; right: 20px; color: #ff0; font-size: 26px; text-shadow: 0 0 10px #ff0; z-index: 10; pointer-events: none; }
 
-        /* FIXED JOYSTICK */
-        #joy-base { position: absolute; bottom: 30px; left: 30px; width: 130px; height: 130px; background: rgba(255,255,255,0.1); border: 2px solid #0ff; border-radius: 50%; z-index: 20; }
-        #joy-knob { position: absolute; top: 40px; left: 40px; width: 50px; height: 50px; background: #0ff; border-radius: 50%; box-shadow: 0 0 15px #0ff; }
+        /* Buttons - Polished with Glow and Better Sizing */
+        .btn { position: absolute; z-index: 20; border-radius: 50%; border: 4px solid #fff; color: #fff; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); font-size: 16px; box-shadow: 0 0 20px rgba(255,255,255,0.4); transition: transform 0.1s; }
+        .btn:active { transform: scale(1.1); }
+        #jump-btn { bottom: 130px; right: 50px; width: 90px; height: 90px; background: #4400ff; box-shadow: 0 0 25px #4400ff; }
+        #shoot-btn { bottom: 20px; right: 40px; width: 120px; height: 120px; background: #ff0044; border-color: #ff0; font-size: 22px; box-shadow: 0 0 25px #ff0044; animation: shootpulse 1.2s infinite; }
+        @keyframes shootpulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        #win-screen { position: fixed; inset: 0; background: rgba(0,0,0,0.8); color: #fff; display: none; align-items: center; justify-content: center; flex-direction: column; z-index: 500; font-size: 50px; text-shadow: 0 0 20px #0f0; }
-        #game-over { position: fixed; inset: 0; background: rgba(0,0,0,0.8); color: #f00; display: none; align-items: center; justify-content: center; flex-direction: column; z-index: 500; font-size: 50px; text-shadow: 0 0 20px #f00; }
+        /* FIXED JOYSTICK - Smoother with Glow */
+        #joy-base { position: absolute; bottom: 30px; left: 30px; width: 140px; height: 140px; background: rgba(255,255,255,0.1); border: 3px solid #0ff; border-radius: 50%; z-index: 20; box-shadow: 0 0 15px #0ff; }
+        #joy-knob { position: absolute; top: 45px; left: 45px; width: 50px; height: 50px; background: #0ff; border-radius: 50%; box-shadow: 0 0 20px #0ff; }
+
+        #win-screen { position: fixed; inset: 0; background: rgba(0,0,0,0.9); color: #0ff; display: none; align-items: center; justify-content: center; flex-direction: column; z-index: 500; font-size: 60px; text-shadow: 0 0 30px #0ff; animation: winGlow 1.5s infinite; }
+        @keyframes winGlow { 0% { text-shadow: 0 0 30px #0ff; } 50% { text-shadow: 0 0 50px #0ff; } 100% { text-shadow: 0 0 30px #0ff; } }
+
+        #game-over { position: fixed; inset: 0; background: rgba(0,0,0,0.9); color: #f00; display: none; align-items: center; justify-content: center; flex-direction: column; z-index: 500; font-size: 60px; text-shadow: 0 0 30px #f00; animation: loseGlow 1.5s infinite; }
+        @keyframes loseGlow { 0% { text-shadow: 0 0 30px #f00; } 50% { text-shadow: 0 0 50px #f00; } 100% { text-shadow: 0 0 30px #f00; } }
+
+        #cake-warning { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); color: #f00; font-size: 20px; opacity: 0.6; pointer-events: none; animation: flicker 2s infinite; }
+        @keyframes flicker { 0%,100% { opacity: 0.6; } 50% { opacity: 0.3; } }
     </style>
 </head>
 <body>
     <div id="lock"><h1>ROTATE SCREEN BRO!<br>SIGMAS PLAY HORIZONTAL</h1></div>
-    <div id="win-screen"><h1>THX BRO!</h1><p style="font-size: 20px;">VULVIAN LEVEL UP</p></div>
-    <div id="game-over"><h1>GRIND OVER!</h1><p style="font-size: 20px;">RETRY SIGMA</p></div>
+    <div id="cake-warning">THE CAKE IS A LIE. THE CAKE IS A LIE.</div>
 
     <div id="hud">
         <div class="stat">VULVIAN LVL: <span id="vlvl">1</span></div>
+        <div class="stat">KILLS: <span id="kills">0</span></div>
         <div id="hp-bg"><div id="hp-val"></div></div>
     </div>
     <div id="score">SCORE: <span id="score-val">0</span></div>
@@ -47,12 +57,16 @@
     <div id="jump-btn" class="btn">JUMP</div>
     <div id="shoot-btn" class="btn">SNOT</div>
 
+    <div id="win-screen"><h1>THX BRO!</h1><p style="font-size: 30px;">VULVIAN LEVEL UP</p><p style="font-size: 24px;">SCORE: <span id="win-score">0</span></p></div>
+    <div id="game-over"><h1>GRIND OVER!</h1><p style="font-size: 30px;">RETRY SIGMA</p><p style="font-size: 24px;">SCORE: <span id="lose-score">0</span></p></div>
+
     <script src="https://unpkg.com/three@0.155.0/build/three.min.js"></script>
     <script>
-        /** ENGINE INITIALIZATION **/
+        /** DABBADOO: FINAL SIGMA - ENHANCED EDITION **/
         let scene, camera, renderer, clock, gun;
-        let platforms = [], enemies = [], bullets = [], powerUps = [];
-        let vLvl = 1, hp = 100, score = 0, isPlaying = true, jumps = 0, velY = 0;
+        let platforms = [], enemies = [], bullets = [], powerUps = [], snotParticles = [];
+        let vLvl = 1, hp = 100, score = 0, kills = 0, ammo = 12, maxAmmo = 12, reloading = false;
+        let jumps = 0, velY = 0, isPlaying = true;
         let move = { x: 0, y: 0 }, look = { x: 0, y: 0 };
         let touches = { move: null, look: null, lx: 0, ly: 0 };
         let boobi, cage;
@@ -65,17 +79,17 @@
             canvas.width = 512; canvas.height = 512;
             const ctx = canvas.getContext('2d');
             ctx.fillStyle = '#050010'; ctx.fillRect(0,0,512,512);
-            for(let i=0; i<200; i++) {
+            for(let i=0; i<300; i++) { // More stars for better design
                 ctx.fillStyle = '#fff';
-                ctx.fillRect(Math.random()*512, Math.random()*512, 2, 2);
+                ctx.fillRect(Math.random()*512, Math.random()*512, 1 + Math.random()*2, 1 + Math.random()*2);
             }
             const tex = new THREE.CanvasTexture(canvas);
             tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-            tex.repeat.set(5, 5);
+            tex.repeat.set(6, 6);
             return tex;
         }
 
-        function createFaceTexture(evil) {
+        function createFaceTexture(evil = false) {
             const canvas = document.createElement('canvas');
             canvas.width = 64; canvas.height = 64;
             const ctx = canvas.getContext('2d');
@@ -95,265 +109,6 @@
             scene = new THREE.Scene();
             clock = new THREE.Clock();
             
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-            
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            document.body.appendChild(renderer.domElement);
+            camera = new THREE.PerspectiveCamera(85, window.innerWidth/window.innerHeight, 0.1, 1000); // Slightly wider FOV for better immersion
 
-            // SKYBOX
-            const skyGeo = new THREE.SphereGeometry(500, 32, 32);
-            const skyMat = new THREE.MeshBasicMaterial({ map: createStarBox(), side: THREE.BackSide });
-            scene.add(new THREE.Mesh(skyGeo, skyMat));
-
-            const ambient = new THREE.AmbientLight(0xffffff, 0.5);
-            const sun = new THREE.DirectionalLight(0x00ff00, 1);
-            sun.position.set(5, 10, 7);
-            scene.add(ambient, sun);
-
-            // GUN
-            gun = new THREE.Group();
-            const gBody = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.7), new THREE.MeshStandardMaterial({color: 0x222222}));
-            const gMuzzle = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.2), new THREE.MeshStandardMaterial({color: 0x00ff00}));
-            gMuzzle.position.z = -0.4;
-            gun.add(gBody, gMuzzle);
-            gun.position.set(0.4, -0.3, -0.5);
-            camera.add(gun);
-            scene.add(camera);
-
-            generateLevel();
-            setupControls();
-            window.addEventListener('resize', onResize);
-        }
-
-        function generateLevel() {
-            platforms.forEach(p => scene.remove(p));
-            enemies.forEach(e => scene.remove(e));
-            powerUps.forEach(u => scene.remove(u));
-            if(cage) scene.remove(cage);
-            if(boobi) scene.remove(boobi);
-            platforms = []; enemies = []; powerUps = [];
-            
-            camera.position.set(0, 5, 0);
-            isPlaying = true;
-
-            // Start
-            addPlatform(0, 0, 0, 15, 15, 0x333333);
-
-            let z = -15;
-            let y = 0;
-            const count = 10 + (vLvl * 3); // More levels
-
-            for(let i=0; i<count; i++) {
-                let x = (Math.random()-0.5) * 12;
-                y += (Math.random()-0.2) * 3;
-                z -= 15 + Math.random() * 10; // Varied spacing
-                let w = 10 + Math.random() * 5;
-                let d = 10 + Math.random() * 5;
-                addPlatform(x, y, z, w, d, 0x0066ff);
-                if(i % 2 === 0) spawnMob(x, y+3, z); // More enemies
-                if(i % 3 === 0) spawnPowerUp(x, y+2, z); // Add power-ups
-            }
-
-            // Goal
-            z -= 30;
-            addPlatform(0, y, z, 15, 15, 0xff0066);
-            spawnRescue(0, y+2, z);
-        }
-
-        function addPlatform(x, y, z, w, d, col) {
-            const b = new THREE.Mesh(new THREE.BoxGeometry(w, 2, d), new THREE.MeshStandardMaterial({color: col, emissive: col, emissiveIntensity: 0.2}));
-            b.position.set(x, y, z);
-            b.userData.bounds = { xMin: x-w/2, xMax: x+w/2, zMin: z-d/2, zMax: z+d/2, y: y+1 };
-            scene.add(b);
-            platforms.push(b);
-        }
-
-        function spawnMob(x, y, z) {
-            const m = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshStandardMaterial({color: 0xff4400}));
-            m.position.set(x, y, z);
-            m.userData = { hp: 1 + vLvl, speed: 0.05 + (vLvl*0.01) };
-            scene.add(m);
-            enemies.push(m);
-        }
-
-        function spawnPowerUp(x, y, z) {
-            const u = new THREE.Mesh(new THREE.SphereGeometry(1), new THREE.MeshStandardMaterial({color: 0xffff00, emissive: 0xffff00, emissiveIntensity: 1}));
-            u.position.set(x + (Math.random()-0.5)*5, y, z + (Math.random()-0.5)*5);
-            u.userData.type = Math.random() > 0.5 ? 'hp' : 'ammo';
-            scene.add(u);
-            powerUps.push(u);
-        }
-
-        function spawnRescue(x, y, z) {
-            cage = new THREE.Mesh(new THREE.BoxGeometry(5, 6, 5), new THREE.MeshStandardMaterial({color: 0xffffff, wireframe: true}));
-            cage.position.set(x, y+2, z);
-            boobi = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2, 1), new THREE.MeshStandardMaterial({color: 0xff0000}));
-            boobi.position.copy(cage.position);
-            scene.add(cage, boobi);
-        }
-
-        function setupControls() {
-            const joy = document.getElementById('joy-base'), knob = document.getElementById('joy-knob');
-            
-            window.addEventListener('touchstart', e => {
-                for(let t of e.changedTouches) {
-                    let r = joy.getBoundingClientRect();
-                    if(t.clientX > r.left && t.clientX < r.right && t.clientY > r.top && t.clientY < r.bottom) {
-                        touches.move = t.identifier;
-                    } else if(!touches.look) {
-                        touches.look = t.identifier;
-                        touches.lx = t.clientX; touches.ly = t.clientY;
-                    }
-                }
-            }, {passive: false});
-
-            window.addEventListener('touchmove', e => {
-                for(let t of e.changedTouches) {
-                    if(t.identifier === touches.move) {
-                        let r = joy.getBoundingClientRect();
-                        let dx = t.clientX - (r.left + 65), dy = t.clientY - (r.top + 65);
-                        let dist = Math.min(Math.sqrt(dx*dx+dy*dy), 55);
-                        let angle = Math.atan2(dy, dx);
-                        knob.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
-                        move.x = Math.cos(angle) * (dist/55); move.y = -Math.sin(angle) * (dist/55);
-                    }
-                    if(t.identifier === touches.look) {
-                        look.x -= (t.clientX - touches.lx) * 0.25;
-                        look.y -= (t.clientY - touches.ly) * 0.25;
-                        touches.lx = t.clientX; touches.ly = t.clientY;
-                    }
-                }
-            }, {passive: false});
-
-            window.addEventListener('touchend', e => {
-                for(let t of e.changedTouches) {
-                    if(t.identifier === touches.move) { 
-                        touches.move = null; move.x = 0; move.y = 0; knob.style.transform = `translate(0,0)`;
-                    }
-                    if(t.identifier === touches.look) touches.look = null;
-                }
-            });
-
-            document.getElementById('jump-btn').ontouchstart = () => { if(jumps < 2) { velY = 0.35; jumps++; } };
-            document.getElementById('shoot-btn').ontouchstart = fire;
-        }
-
-        function fire() {
-            const b = new THREE.Mesh(new THREE.SphereGeometry(0.2), new THREE.MeshBasicMaterial({color: 0x00ff00}));
-            b.position.copy(camera.position);
-            const dir = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
-            b.userData.v = dir.multiplyScalar(2.5);
-            scene.add(b); bullets.push(b);
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-            if(!isPlaying) return;
-
-            // Rotation
-            look.y = Math.max(-85, Math.min(85, look.y));
-            camera.rotation.order = 'YXZ';
-            camera.rotation.y = THREE.MathUtils.degToRad(look.x);
-            camera.rotation.x = THREE.MathUtils.degToRad(look.y);
-
-            // Movement
-            let forward = new THREE.Vector3(move.x, 0, -move.y).applyQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0), camera.rotation.y));
-            camera.position.add(forward.multiplyScalar(0.25));
-
-            // FIXED PHYSICS
-            velY -= 0.016;
-            camera.position.y += velY;
-
-            platforms.forEach(p => {
-                const b = p.userData.bounds;
-                if(camera.position.x > b.xMin && camera.position.x < b.xMax && 
-                   camera.position.z > b.zMin && camera.position.z < b.zMax) {
-                    if(camera.position.y > b.y && camera.position.y < b.y + 2) {
-                        camera.position.y = b.y + 0.8;
-                        velY = 0; jumps = 0;
-                    }
-                }
-            });
-
-            if(camera.position.y < -40) { hp -= 25; camera.position.set(0, 10, 0); updateHUD(); if(hp <= 0) gameOver(); }
-
-            // Enemies
-            enemies.forEach(e => {
-                let d = e.position.distanceTo(camera.position);
-                if(d < 25) {
-                    e.lookAt(camera.position.x, e.position.y, camera.position.z);
-                    e.position.add(new THREE.Vector3().subVectors(camera.position, e.position).normalize().multiplyScalar(e.userData.speed));
-                    if(d < 2) { hp -= 0.5; updateHUD(); if(hp <= 0) gameOver(); }
-                }
-            });
-
-            // Power-ups
-            powerUps.forEach((u, i) => {
-                let d = u.position.distanceTo(camera.position);
-                if(d < 2) {
-                    if(u.userData.type === 'hp') hp = Math.min(100, hp + 20);
-                    if(u.userData.type === 'ammo') ammo = Math.min(maxAmmo, ammo + 5);
-                    scene.remove(u); powerUps.splice(i, 1);
-                    updateHUD();
-                }
-            });
-
-            // Bullets
-            bullets.forEach((b, i) => {
-                b.position.add(b.userData.v);
-                enemies.forEach((e, j) => {
-                    if(b.position.distanceTo(e.position) < 2) {
-                        scene.remove(e); enemies.splice(j,1);
-                        scene.remove(b); bullets.splice(i,1);
-                        score += 100;
-                        updateScore();
-                    }
-                });
-            });
-
-            // Boobi Animation
-            if(boobi) boobi.position.y += Math.sin(Date.now()*0.005)*0.01;
-
-            if(boobi && camera.position.distanceTo(boobi.position) < 5) win();
-
-            renderer.render(scene, camera);
-        }
-
-        function updateHUD() {
-            document.getElementById('hp-val').style.width = hp + "%";
-        }
-
-        function updateScore() {
-            document.getElementById('score-val').innerText = score;
-        }
-
-        function gameOver() {
-            isPlaying = false;
-            document.getElementById('game-over').style.display = 'flex';
-            setTimeout(() => {
-                document.getElementById('game-over').style.display = 'none';
-                generateLevel();
-            }, 3000);
-        }
-
-        function win() {
-            isPlaying = false;
-            vLvl++;
-            document.getElementById('vlvl').innerText = vLvl;
-            document.getElementById('win-screen').style.display = 'flex';
-            setTimeout(() => {
-                document.getElementById('win-screen').style.display = 'none';
-                generateLevel();
-            }, 3000);
-        }
-
-        function onResize() {
-            camera.aspect = window.innerWidth/window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-    </script>
-</body>
-</html>
+            renderer = new THREE.Web
