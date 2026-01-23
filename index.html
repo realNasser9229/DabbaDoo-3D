@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DABBADOO: SIGMA GRIND EDITION - FIXED</title>
+    <title>DABBADOO: SIGMA GRIND - FIXED FOREVER</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap');
         body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Black Ops One', system-ui; }
@@ -64,7 +64,7 @@
     <div id="game-over">
         <h1>VULVIAN DOWN</h1>
         <p>BOOBI DOODI STILL CAGED</p>
-        <p style="font-size: 30px;">RELOAD FOR ONE MORE RUN</p>
+        <p style="font-size: 30px;">RELOADING IN 5S...</p>
     </div>
 
     <div id="joy-base"><div id="joy-knob"></div></div>
@@ -221,7 +221,7 @@
                 e.preventDefault();
                 for(let t of e.changedTouches) {
                     let r = joy.getBoundingClientRect();
-                    if(t.clientX < window.innerWidth / 2 && t.clientY > window.innerHeight / 2) {
+                    if(t.clientX < window.innerWidth / 2) {
                         touches.move = t.identifier;
                     } else {
                         touches.look = t.identifier;
@@ -332,7 +332,7 @@
             gameOver = true;
             isPlaying = false;
             document.getElementById('game-over').style.display = 'flex';
-            setTimeout(() => location.reload(), 5000); // Auto-reload after 5s
+            setTimeout(() => location.reload(), 5000);
         }
 
         function win() {
@@ -433,4 +433,4 @@
         }
     </script>
 </body>
-                                                                         </html>
+</html>
