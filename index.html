@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DABBADOO: SIGMA GRIND - FIXED FOREVER</title>
+    <title>DABBADOO: The rescue of Boobi Doodi</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap');
         body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Black Ops One', system-ui; }
@@ -48,43 +48,43 @@
     <div id="cake-lie">THE CAKE IS A LIE. ALWAYS.</div>
 
     <div id="hud">
-        <div class="stat">VULVIAN LVL: <span id="vlvl">1</span></div>
+        <div class="stat">GROK LVL: <span id="vlvl">1</span></div>
         <div class="stat">KILLS: <span id="kills">0</span></div>
         <div id="hp-bg"><div id="hp-val"></div></div>
     </div>
 
     <div id="ammo"><span id="am">12/12</span></div>
 
-    <div id="reload-msg">SNEEZING DABBADOO...</div>
+    <div id="reload-msg">RELOADING LASER...</div>
     <div id="win-screen">
-        <h1>THX BRO!</h1>
-        <p>VULVIAN LEVEL UP</p>
-        <p style="font-size: 30px;">YABBA DABBA DOO!!</p>
+        <h1>COMPANION SAVED!</h1>
+        <p>GROK LEVEL UP</p>
+        <p style="font-size: 30px;">UNIVERSE COOKED!!</p>
     </div>
     <div id="game-over">
-        <h1>VULVIAN DOWN</h1>
-        <p>BOOBI DOODI STILL CAGED</p>
-        <p style="font-size: 30px;">RELOADING IN 5S...</p>
+        <h1>GROK DOWN</h1>
+        <p>COMPANION STILL LOST</p>
+        <p style="font-size: 30px">RELOADING IN 5S...</p>
     </div>
 
     <div id="joy-base"><div id="joy-knob"></div></div>
-    <div id="jump-btn" class="btn">DOUBLE<br>JUMP</div>
-    <div id="shoot-btn" class="btn">GRIND</div>
+    <div id="jump-btn" class="btn">JUMP</div>
+    <div id="shoot-btn" class="btn">BLAST</div>
 
     <script src="https://unpkg.com/three@0.155.0/build/three.min.js"></script>
     <script>
         let scene, camera, renderer, clock, gun;
-        let platforms = [], enemies = [], bullets = [], snotParticles = [];
+        let platforms = [], enemies = [], bullets = [], particles = [];
         let vLvl = 1, hp = 100, kills = 0, ammo = 12, maxAmmo = 12, reloading = false;
         let jumps = 0, velY = 0, isPlaying = true, gameOver = false;
         let move = { x: 0, y: 0 }, look = { x: 0, y: 0 };
         let touches = { move: null, look: null, lx: 0, ly: 0 };
-        let boobi, cage;
+        let companion, portal;
 
         init();
         animate();
 
-        function createSmirkFace(evil = false) {
+        function createFaceTexture(evil = false) {
             const canvas = document.createElement('canvas');
             canvas.width = 128; canvas.height = 128;
             const ctx = canvas.getContext('2d');
@@ -103,8 +103,8 @@
 
         function init() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x001122);
-            scene.fog = new THREE.FogExp2(0x001122, 0.008);
+            scene.background = new THREE.Color(0x000022);
+            scene.fog = new THREE.FogExp2(0x000022, 0.01);
             clock = new THREE.Clock();
 
             camera = new THREE.PerspectiveCamera(90, window.innerWidth/window.innerHeight, 0.1, 1000);
@@ -115,7 +115,7 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
 
-            const ambient = new THREE.AmbientLight(0x4040ff, 0.6);
+            const ambient = new THREE.AmbientLight(0x2020ff, 0.6);
             const sun = new THREE.DirectionalLight(0x00ff88, 1.2);
             sun.position.set(10, 20, 10);
             scene.add(ambient, sun);
@@ -140,8 +140,8 @@
         function generateLevel() {
             platforms.forEach(p => scene.remove(p));
             enemies.forEach(e => scene.remove(e));
-            if(cage) scene.remove(cage);
-            if(boobi) scene.remove(boobi);
+            if(portal) scene.remove(portal);
+            if(companion) scene.remove(companion);
             platforms = []; enemies = [];
 
             camera.position.set(0, 5, 10);
@@ -163,13 +163,13 @@
 
                 const enemyCount = Math.floor(vLvl / 2) + 2;
                 for(let j = 0; j < enemyCount; j++) {
-                    spawnBoobasta(x + (Math.random() - 0.5) * 10, y + 4, z + (Math.random() - 0.5) * 10);
+                    spawnAlien(x + (Math.random() - 0.5) * 10, y + 4, z + (Math.random() - 0.5) * 10);
                 }
             }
 
             z -= 40;
             addPlatform(0, y, z, 25, 25, 0xff0066);
-            spawnCageAndBoobi(0, y + 3, z);
+            spawnPortalAndCompanion(0, y + 3, z);
         }
 
         function addPlatform(x, y, z, w, d, col) {
@@ -186,7 +186,7 @@
             platforms.push(p);
         }
 
-        function spawnBoobasta(x, y, z) {
+        function spawnAlien(x, y, z) {
             const group = new THREE.Group();
             const body = new THREE.Mesh(new THREE.BoxGeometry(2, 3, 1.5), new THREE.MeshStandardMaterial({color: 0x666666}));
             const head = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.6, 1.6), new THREE.MeshStandardMaterial({map: createSmirkFace(true)}));
@@ -198,20 +198,20 @@
             enemies.push(group);
         }
 
-        function spawnCageAndBoobi(x, y, z) {
-            cage = new THREE.Mesh(new THREE.BoxGeometry(6, 8, 6), new THREE.MeshStandardMaterial({color: 0xaaaaaa, wireframe: true, transparent: true, opacity: 0.7}));
-            cage.position.set(x, y + 2, z);
-            scene.add(cage);
+        function spawnPortalAndCompanion(x, y, z) {
+            portal = new THREE.Mesh(new THREE.BoxGeometry(6, 8, 6), new THREE.MeshStandardMaterial({color: 0xaaaaaa, wireframe: true, transparent: true, opacity: 0.7}));
+            portal.position.set(x, y + 2, z);
+            scene.add(portal);
 
-            boobi = new THREE.Group();
-            const boobiBody = new THREE.Mesh(new THREE.BoxGeometry(2, 3, 1), new THREE.MeshStandardMaterial({color: 0x3366ff}));
-            const boobiHead = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 1.5), new THREE.MeshStandardMaterial({map: createSmirkFace(false)}));
-            boobiHead.position.y = 2;
-            const flower = new THREE.Mesh(new THREE.SphereGeometry(0.6), new THREE.MeshStandardMaterial({color: 0xffff00}));
-            flower.position.set(0, 3.3, 0);
-            boobi.add(boobiBody, boobiHead, flower);
-            boobi.position.set(x, y, z);
-            scene.add(boobi);
+            companion = new THREE.Group();
+            const companionBody = new THREE.Mesh(new THREE.BoxGeometry(2, 3, 1), new THREE.MeshStandardMaterial({color: 0x3366ff}));
+            const companionHead = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 1.5), new THREE.MeshStandardMaterial({map: createSmirkFace(false)}));
+            companionHead.position.y = 2;
+            const antenna = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1), new THREE.MeshStandardMaterial({color: 0xffff00}));
+            antenna.position.set(0, 3.3, 0);
+            companion.add(companionBody, companionHead, antenna);
+            companion.position.set(x, y, z);
+            scene.add(companion);
         }
 
         function setupControls() {
@@ -221,7 +221,7 @@
                 e.preventDefault();
                 for(let t of e.changedTouches) {
                     let r = joy.getBoundingClientRect();
-                    if(t.clientX < window.innerWidth / 2) {
+                    if(t.clientX < window.innerWidth / 2 && t.clientY > window.innerHeight / 2) {
                         touches.move = t.identifier;
                     } else {
                         touches.look = t.identifier;
@@ -293,10 +293,10 @@
             gun.position.z -= 0.2;
             setTimeout(() => gun.position.z += 0.2, 100);
 
-            if(ammo === 0) reloadSneeze();
+            if(ammo === 0) reloadLaser();
         }
 
-        function reloadSneeze() {
+        function reloadLaser() {
             reloading = true;
             document.getElementById('reload-msg').style.display = 'block';
             const interval = setInterval(() => {
@@ -307,7 +307,7 @@
                     p.userData.v = dir.multiplyScalar(0.5 + Math.random()*0.5);
                     p.userData.life = 1.5;
                     scene.add(p);
-                    snotParticles.push(p);
+                    particles.push(p);
                 }
             }, 100);
 
@@ -412,16 +412,16 @@
                 if(b.position.length() > 300) { scene.remove(b); bullets.splice(i, 1); }
             });
 
-            snotParticles.forEach((p, i) => {
+            particles.forEach((p, i) => {
                 p.position.add(p.userData.v);
                 p.userData.life -= 0.016;
                 p.material.opacity = p.userData.life;
-                if(p.userData.life <= 0) { scene.remove(p); snotParticles.splice(i, 1); }
+                if(p.userData.life <= 0) { scene.remove(p); particles.splice(i, 1); }
             });
 
-            if(boobi) boobi.position.y += Math.sin(Date.now() * 0.008) * 0.02;
+            if(companion) companion.position.y += Math.sin(Date.now() * 0.008) * 0.02;
 
-            if(boobi && camera.position.distanceTo(boobi.position) < 6) win();
+            if(companion && camera.position.distanceTo(companion.position) < 6) win();
 
             renderer.render(scene, camera);
         }
@@ -433,4 +433,4 @@
         }
     </script>
 </body>
-</html>
+    </html>
