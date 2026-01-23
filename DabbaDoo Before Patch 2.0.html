@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DABBADOO: LORE EDITION</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Press+Start+2P&display=swap');
+        
+        body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Black Ops One', system-ui; user-select: none; }
+        
+        /* BOBOB MACHINE LOADING SCREEN */
+        #bobob-screen { position: fixed; inset: 0; background: #111; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; }
+        #gear { font-size: 80px; animation: spin 2s linear infinite; color: #ff0044; }
+        .ragor { color: #888; margin-top: 20px; font-family: 'Press Start 2P', cursive; font-size: 12px; text-transform: uppercase; }
+        .start-btn { margin-top: 40px; padding: 20px 40px; background: #0f0; color: #000; border: 4px solid #fff; font-size: 24px; cursor: pointer; animation: pulse 1s infinite; text-transform: uppercase; font-weight: bold; }
+        
+        /* UI OVERLAYS */
+        #crosshair { position: fixed; top: 50%; left: 50%; width: 6px; height: 6px; background: #0f0; border: 2px solid #000; transform: translate(-50%, -50%); z-index: 50; box-shadow: 0 0 10px #0f0; pointer-events: none; }
+        #sneeze-text { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%) rotate(-10deg); color: #0f0; font-size: 60px; text-shadow: 4px 4px #000; display: none; pointer-events: none; z-index: 60; -webkit-text-stroke: 2px #fff; }
+        
+        /* HUD */
+        #hud { position: absolute; top: 10px; left: 10px; z-index: 10; pointer-events: none; }
+        .stat-box { background: rgba(0,0,0,0.7); border: 2px solid #fff; padding: 10px; margin-bottom: 5px; color: #fff; font-family: 'Press Start 2P'; font-size: 12px; }
+        #spinach-bar { width: 200px; height: 10px; background: #333; margin-top: 5px; border: 1px solid #fff; }
+        #spinach-val { width: 0%; height: 100%; background: #0f0; transition: 0.1s; }
+
+        /* CONTROLS */
+        .btn { position: absolute; z-index: 20; border-radius: 10px; border: 3px solid #fff; color: #fff; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); font-size: 16px; font-family: 'Black Ops One'; box-shadow: 4px 4px 0px #000; }
+        .btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px #000; }
+        
+        #jump-btn { bottom: 120px; right: 30px; width: 80px; height: 80px; background: #0055ff; }
+        #shoot-btn { bottom: 20px; right: 20px; width: 100px; height: 100px; background: #ff0044; font-size: 20px; }
+
+        /* JOYSTICK */
+        #joy-base { position: absolute; bottom: 40px; left: 40px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border: 3px dashed #fff; border-radius: 50%; z-index: 20; }
+        #joy-knob { position: absolute; top: 35px; left: 35px; width: 50px; height: 50px; background: #fff; border-radius: 50%; box-shadow: 0 0 15px #fff; }
+
+        /* SCREENS */
+        #win-screen { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; color: #fff; z-index: 500; text-align: center; }
+        
+        /* ANIMATIONS */
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        
+        #lock { display: none; position: fixed; inset: 0; background: #000; z-index: 10000; color: #f00; align-items: center; justify-content: center; text-align: center; border: 10px solid #f00; }
+        @media (orientation: portrait) { #lock { display: flex; } }
+    </style>
+</head>
+<body>
+    <div id="lock"><h1>ROTATE YOUR PHONE<br>OR DR. RAGOR WILL RAGE</h1></div>
+    
+    <div id="bobob-screen">
+        <div id="gear">⚙️</div>
+        <h1>BOBOB MACHINE</h1>
+        <div class="ragor">Dr. RagorGaming Studios</div>
+        <div style="margin-top:10px; color: #ff0000; font-size: 10px;">(Cracked by HappyMod)</div>
+        <div class="start-btn" id="start-btn">BOOT ENGINE</div>
+    </div>
+
+    <div id="crosshair"></div>
+    <div id="sneeze-text">DABBADOO!</div>
+
+    <div id="win-screen">
+        <h1 style="color:#0f0; font-size: 50px;">MISSION PASSED</h1>
+        <p style="font-size: 20px; color: #ff0;">RESPECT +</p>
+        <p>"Thx bro"</p>
+    </div>
+
+    <div id="hud">
+        <div class="stat-box">VULVIAN HEALTH: <span id="hp-txt">100</span>%</div>
+        <div class="stat-box">BROTHER STATUS: <span style="color:#f00">MISSING</span></div>
+        <div id="spinach-bar"><div id="spinach-val"></div></div>
+    </div>
+
+    <div id="joy-base"><div id="joy-knob"></div></div>
+    <div id="jump-btn" class="btn">JUMP</div>
+    <div id="shoot-btn" class="btn">FIRE</div>
+
+    <script src="https://unpkg.com/three@0.155.0/build/three.min.js"></script>
+    <script>
+        /** --- THE RAGOR AUDIO ENGINE --- **/
+        const AudioSys = {
+            ctx: null,
+            init: function() {
+                window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                this.ctx = new AudioContext();
+            },
+            playTone: function(freq, type, dur, vol = 0.1, slide = 0) {
+                if(!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                if(slide !== 0) osc.frequency.linearRampToValueAtTime(freq + slide, this.ctx.currentTime + dur);
+                gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + dur);
+            },
+            shoot: function() { this.playTone(400, 'sawtooth', 0.1, 0.1, -300); },
+            jump: function() { this.playTone(200, 'sine', 0.3, 0.2, 200); }, // Halo sound
+            sneeze: function() { 
+                this.playTone(800, 'sawtooth', 0.1, 0.3, -600); // "Ah"
+                setTimeout(() => this.playTone(100, 'square', 0.3, 0.4, -50), 100); // "Choo"
+            },
+            boom: function() { 
+                this.playTone(100, 'sawtooth', 0.2, 0.3);
+                this.playTone(50, 'square', 0.4, 0.3);
+            }
+        };
+
+        /** --- GAME VARIABLES --- **/
+        let scene, camera, renderer, clock;
+        let vulvianArms, gun, muzzleLight;
+        let platforms = [], enemies = [], bullets = [], particles = [];
+        let brother, cage;
+        let hp = 100, isPlaying = false, jumps = 0, velY = 0;
+        let move = { x: 0, y: 0 }, look = { x: 0, y: 0 };
+        let touches = { move: null, look: null, lx: 0, ly: 0 };
+        
+        let shotsFired = 0;
+        let gunRecoil = 0;
+        let screenShake = 0;
+
+        // "Cake is a Lie" texture generator
+        function createTextTexture(text, color, bg) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = bg; ctx.fillRect(0,0,256,128);
+            ctx.fillStyle = color; ctx.font = 'bold 30px Arial';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(text, 128, 64);
+            const t = new THREE.CanvasTexture(canvas);
+            return new THREE.MeshStandardMaterial({map: t});
+        }
+
+        document.getElementById('start-btn').addEventListener('click', () => {
+            document.getElementById('bobob-screen').style.display = 'none';
+            AudioSys.init();
+            init();
+            animate();
+        });
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x050010, 0.02);
+            clock = new THREE.Clock();
+            
+            camera = new THREE.PerspectiveCamera(90, window.innerWidth/window.innerHeight, 0.1, 1000);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: false }); // Performance optimization for potato phones
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // LIGHTING
+            const ambient = new THREE.AmbientLight(0xffffff, 0.7);
+            const sun = new THREE.DirectionalLight(0xff0044, 0.8); // Red hell sun
+            sun.position.set(10, 20, 10);
+            scene.add(ambient, sun);
+
+            // VULVIAN (First Person Rig)
+            vulvianArms = new THREE.Group();
+            
+            // Right Arm (White Sleeve)
+            const rArm = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.8, 0.25), new THREE.MeshStandardMaterial({color: 0xffffff}));
+            rArm.position.set(0.3, -0.4, 0.2);
+            rArm.rotation.x = Math.PI / 2.5;
+            
+            // Right Hand (Black Glove)
+            const rHand = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.26, 0.26), new THREE.MeshStandardMaterial({color: 0x111111}));
+            rHand.position.set(0, -0.5, 0);
+            rArm.add(rHand);
+
+            // Gun (Chunky Black AR)
+            gun = new THREE.Group();
+            const gBody = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.2, 0.6), new THREE.MeshStandardMaterial({color: 0x222222}));
+            const gMag = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.4, 0.15), new THREE.MeshStandardMaterial({color: 0x000000}));
+            gMag.position.set(0, -0.2, 0.1);
+            
+            muzzleLight = new THREE.PointLight(0x00ff00, 0, 4); // Neon Green Flash
+            muzzleLight.position.set(0, 0.1, -0.5);
+            
+            gun.add(gBody, gMag, muzzleLight);
+            rHand.add(gun);
+            gun.position.set(0, 0, -0.2);
+            gun.rotation.x = -Math.PI/2;
+
+            vulvianArms.add(rArm);
+            vulvianArms.position.set(0, -0.2, -0.3);
+            camera.add(vulvianArms);
+            scene.add(camera);
+
+            generateLevel();
+            setupControls();
+            window.addEventListener('resize', onResize);
+        }
+
+        // --- THE BOOBASTA (Enemy) ---
+        function createBoobasta() {
+            const group = new THREE.Group();
+            // Gray Body
+            const body = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2, 0.8), new THREE.MeshStandardMaterial({color: 0x888888}));
+            body.position.y = 1;
+            // Head
+            const head = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({color: 0xffffff})); // White face
+            head.position.y = 2.5;
+            // Smirk (Black strip)
+            const smirk = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.1, 0.05), new THREE.MeshBasicMaterial({color: 0x000000}));
+            smirk.position.set(0.1, 0, 0.51); // Offset for smirk
+            smirk.rotation.z = 0.1;
+            head.add(smirk);
+            
+            group.add(body, head);
+            return group;
+        }
+
+        // --- BOOBI DOODI (Brother) ---
+        function createBoobi() {
+            const group = new THREE.Group();
+            // Pants (Blue)
+            const legs = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.5, 0.8), new THREE.MeshStandardMaterial({color: 0x0000aa}));
+            legs.position.y = 0.75;
+            // Torso (Red/White Striped - simplified to Red with white band)
+            const torso = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.5, 0.8), new THREE.MeshStandardMaterial({color: 0xaa0000}));
+            torso.position.y = 2.25;
+            const stripe = new THREE.Mesh(new THREE.BoxGeometry(1.41, 0.3, 0.81), new THREE.MeshStandardMaterial({color: 0xffffff}));
+            stripe.position.y = 0;
+            torso.add(stripe);
+            // Head
+            const head = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.1, 1.1), new THREE.MeshStandardMaterial({color: 0xffccaa}));
+            head.position.y = 3.5;
+            // Hair (Brown Block)
+            const hair = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.4, 1.2), new THREE.MeshStandardMaterial({color: 0x442200}));
+            hair.position.y = 0.6;
+            head.add(hair);
+            // Glasses
+            const glasses = new THREE.Mesh(new THREE.BoxGeometry(1, 0.3, 0.1), new THREE.MeshBasicMaterial({color: 0x000000}));
+            glasses.position.set(0, 0, 0.6);
+            head.add(glasses);
+            // Flower (Yellow box on top)
+            const flower = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.5, 0.2), new THREE.MeshBasicMaterial({color: 0xffff00}));
+            flower.position.y = 0.8;
+            head.add(flower);
+
+            group.add(legs, torso, head);
+            
+            // "Thx Bro" Bubble (Hidden initially)
+            const thxCanvas = document.createElement('canvas');
+            const ctx = thxCanvas.getContext('2d');
+            thxCanvas.width=128; thxCanvas.height=64;
+            ctx.fillStyle = 'white'; ctx.font='20px Arial'; ctx.fillText("Thx bro", 10, 40);
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({map: new THREE.CanvasTexture(thxCanvas)}));
+            sprite.position.y = 5;
+            sprite.scale.set(3, 1.5, 1);
+            sprite.visible = false;
+            group.userData.bubble = sprite;
+            group.add(sprite);
+
+            return group;
+        }
+
+        function generateLevel() {
+            // Reset
+            platforms.forEach(p => scene.remove(p));
+            enemies.forEach(e => scene.remove(e));
+            if(brother) scene.remove(brother);
+            if(cage) scene.remove(cage);
+            platforms = []; enemies = [];
+            
+            camera.position.set(0, 8, 0);
+            isPlaying = true;
+
+            // Materials
+            const matFloor = new THREE.MeshStandardMaterial({color: 0x111111});
+            const matNeon = new THREE.MeshStandardMaterial({color: 0x000000, emissive: 0xff0000, emissiveIntensity: 0.5});
+            const matCake = createTextTexture("THE CAKE IS A LIE", "#ff0000", "#222222");
+
+            // START PLATFORM
+            addBlock(0, 0, 0, 10, 10, matFloor);
+
+            let z = -15;
+            let y = 0;
+            
+            // GENERATE CHAOS OBSTACLE COURSE
+            for(let i=0; i<8; i++) {
+                let x = (Math.random()-0.5) * 15;
+                y += (Math.random()-0.3) * 5;
+                z -= (15 + Math.random()*5);
+                
+                // Randomly assign materials (Neon or Cake)
+                let m = Math.random() > 0.7 ? matCake : matNeon;
+                let w = 6 + Math.random()*4;
+                
+                addBlock(x, y, z, w, w, m);
+
+                // Spawn BOOBASTAS
+                if(i > 0) {
+                    for(let k=0; k<1+Math.floor(i/2); k++) {
+                        let mob = createBoobasta();
+                        mob.position.set(x + (Math.random()-0.5)*4, y+3, z + (Math.random()-0.5)*4);
+                        mob.userData = { hp: 3, speed: 0.08 + (i*0.01) };
+                        scene.add(mob);
+                        enemies.push(mob);
+                    }
+                }
+            }
+
+            // FINAL BOSS PLATFORM
+            z -= 25;
+            addBlock(0, y, z, 20, 20, matFloor);
+            
+            // The Gray Barrier
+            cage = new THREE.Mesh(new THREE.BoxGeometry(8, 8, 8), new THREE.MeshStandardMaterial({color: 0x555555, transparent: true, opacity: 0.8}));
+            cage.position.set(0, y+4, z);
+            cage.userData = { hp: 50, isBarrier: true };
+            scene.add(cage);
+
+            // BOOBI DOODI
+            brother = createBoobi();
+            brother.position.set(0, y, z);
+            scene.add(brother);
+        }
+
+        function addBlock(x, y, z, w, d, mat) {
+            const b = new THREE.Mesh(new THREE.BoxGeometry(w, 2, d), mat);
+            b.position.set(x, y, z);
+            b.userData.bounds = { xMin: x-w/2, xMax: x+w/2, zMin: z-d/2, zMax: z+d/2, yTop: y+1 };
+            // Earthquake FX data
+            b.userData.origX = x;
+            scene.add(b);
+            platforms.push(b);
+        }
+
+        function fire() {
+            const now = Date.now();
+            shotsFired++;
+            gunRecoil = 0.4;
+            
+            // SNEEZ RELOAD LOGIC
+            if(shotsFired % 10 === 0) {
+                AudioSys.sneeze();
+                // Green snot burst
+                for(let i=0; i<20; i++) spawnParticle(camera.position, 0x00ff00, 2);
+                const txt = document.getElementById('sneeze-text');
+                txt.style.display = 'block';
+                setTimeout(() => txt.style.display = 'none', 800);
+            } else {
+                AudioSys.shoot();
+            }
+
+            muzzleLight.intensity = 3;
+
+            const b = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 1), new THREE.MeshBasicMaterial({color: 0xffff00}));
+            
+            // Precise shooting from camera center
+            b.position.copy(camera.position);
+            b.position.y -= 0.2; // slight offset
+            
+            const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+            b.lookAt(camera.position.clone().add(dir));
+            b.userData = { v: dir.multiplyScalar(3) };
+            
+            scene.add(b); bullets.push(b);
+        }
+
+        function spawnParticle(pos, color, scaleMod=1) {
+            const p = new THREE.Mesh(new THREE.BoxGeometry(0.2,0.2,0.2), new THREE.MeshBasicMaterial({color: color}));
+            p.position.copy(pos);
+            p.position.x += (Math.random()-0.5); 
+            p.position.y += (Math.random()-0.5);
+            p.userData = { 
+                vel: new THREE.Vector3((Math.random()-0.5), (Math.random()-0.5)+0.5, (Math.random()-0.5)).multiplyScalar(0.3),
+                life: 1.0 
+            };
+            p.scale.setScalar(scaleMod);
+            scene.add(p); particles.push(p);
+        }
+
+        function setupControls() {
+            const joy = document.getElementById('joy-base'), knob = document.getElementById('joy-knob');
+            
+            window.addEventListener('touchstart', e => {
+                for(let t of e.changedTouches) {
+                    let r = joy.getBoundingClientRect();
+                    if(t.clientX > r.left-20 && t.clientX < r.right+20 && t.clientY > r.top-20 && t.clientY < r.bottom+20) {
+                        touches.move = t.identifier;
+                    } else if(!touches.look && t.target.className !== 'btn') {
+                        touches.look = t.identifier;
+                        touches.lx = t.clientX; touches.ly = t.clientY;
+                    }
+                }
+            }, {passive: false});
+
+            window.addEventListener('touchmove', e => {
+                if(e.cancelable) e.preventDefault();
+                for(let t of e.changedTouches) {
+                    if(t.identifier === touches.move) {
+                        let r = joy.getBoundingClientRect();
+                        let dx = t.clientX - (r.left + 60), dy = t.clientY - (r.top + 60);
+                        let angle = Math.atan2(dy, dx);
+                        let dist = Math.min(Math.sqrt(dx*dx+dy*dy), 50);
+                        knob.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
+                        move.x = Math.cos(angle) * (dist/50); move.y = -Math.sin(angle) * (dist/50);
+                    }
+                    if(t.identifier === touches.look) {
+                        look.x -= (t.clientX - touches.lx) * 0.3;
+                        look.y -= (t.clientY - touches.ly) * 0.3;
+                        touches.lx = t.clientX; touches.ly = t.clientY;
+                    }
+                }
+            }, {passive: false});
+
+            const end = (id) => {
+                if(id===touches.move) { touches.move=null; move.x=0; move.y=0; knob.style.transform='translate(0,0)'; }
+                if(id===touches.look) touches.look=null;
+            };
+            window.addEventListener('touchend', e => { for(let t of e.changedTouches) end(t.identifier); });
+            
+            document.getElementById('jump-btn').ontouchstart = (e) => { 
+                e.preventDefault(); 
+                if(jumps < 2) { velY = 0.45; jumps++; AudioSys.jump(); }
+            };
+            document.getElementById('shoot-btn').ontouchstart = (e) => { e.preventDefault(); fire(); };
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if(!isPlaying) return;
+
+            // 1. Earthquake / Screenshake
+            let shakeX = 0, shakeY = 0;
+            if(screenShake > 0) {
+                shakeX = (Math.random()-0.5) * screenShake;
+                shakeY = (Math.random()-0.5) * screenShake;
+                screenShake *= 0.9;
+            }
+            // Constant platform shake
+            platforms.forEach(p => {
+                p.position.x = p.userData.origX + Math.sin(Date.now()*0.02)*0.05;
+            });
+
+            // 2. Camera Controls
+            look.y = Math.max(-85, Math.min(85, look.y));
+            const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+            euler.x = THREE.MathUtils.degToRad(look.y);
+            euler.y = THREE.MathUtils.degToRad(look.x);
+            camera.quaternion.setFromEuler(euler);
+            
+            const fwd = new THREE.Vector3(0,0,-1).applyAxisAngle(new THREE.Vector3(0,1,0), euler.y);
+            const rgt = new THREE.Vector3(1,0,0).applyAxisAngle(new THREE.Vector3(0,1,0), euler.y);
+            camera.position.add(fwd.multiplyScalar(move.y * 0.25));
+            camera.position.add(rgt.multiplyScalar(move.x * 0.25));
+
+            // Gravity
+            velY -= 0.015;
+            camera.position.y += velY;
+            camera.position.x += shakeX;
+            camera.position.y += shakeY;
+
+            // Floor Collision
+            platforms.forEach(p => {
+                const b = p.userData.bounds;
+                if(camera.position.x > b.xMin && camera.position.x < b.xMax && 
+                   camera.position.z > b.zMin && camera.position.z < b.zMax) {
+                    if(camera.position.y > b.yTop && camera.position.y < b.yTop + 2.5 && velY <= 0) {
+                        camera.position.y = b.yTop + 1.2;
+                        velY = 0; jumps = 0;
+                    }
+                }
+            });
+
+            // Void Death
+            if(camera.position.y < -30) { hp=0; updateHUD(); }
+
+            // 3. Gun Anim
+            gunRecoil *= 0.8;
+            gun.position.z = -0.2 + gunRecoil;
+            muzzleLight.intensity *= 0.5;
+
+            // 4. Enemy Logic (Boobastas)
+            enemies.forEach(e => {
+                let dist = e.position.distanceTo(camera.position);
+                if(dist < 50) {
+                    e.lookAt(camera.position.x, e.position.y, camera.position.z);
+                    e.position.add(new THREE.Vector3(0,0,1).applyQuaternion(e.quaternion).multiplyScalar(e.userData.speed));
+                    if(dist < 2) { hp -= 2; screenShake = 0.5; updateHUD(); }
+                }
+            });
+
+            // 5. Bullets & Collisions
+            for(let i=bullets.length-1; i>=0; i--) {
+                let b = bullets[i];
+                b.position.add(b.userData.v);
+                
+                // Hit Enemy
+                let hit = false;
+                for(let j=enemies.length-1; j>=0; j--) {
+                    if(b.position.distanceTo(enemies[j].position) < 1.5) {
+                        createExplosion(enemies[j].position, 0x888888); // Gray confetti
+                        scene.remove(enemies[j]); enemies.splice(j,1);
+                        hit = true; break;
+                    }
+                }
+                
+                // Hit Barrier (Cage)
+                if(!hit && cage && b.position.distanceTo(cage.position) < 5) {
+                    cage.userData.hp--;
+                    createExplosion(b.position, 0x555555);
+                    cage.scale.multiplyScalar(0.98); // Shrink it
+                    if(cage.userData.hp <= 0) {
+                        scene.remove(cage); cage = null;
+                        createExplosion(new THREE.Vector3(0,5,-40), 0xffffff);
+                    }
+                    hit = true;
+                }
+
+                if(hit || b.position.distanceTo(camera.position) > 80) {
+                    scene.remove(b); bullets.splice(i,1);
+                }
+            }
+
+            // 6. Particles
+            for(let i=particles.length-1; i>=0; i--) {
+                let p = particles[i];
+                p.position.add(p.userData.vel);
+                p.userData.vel.y -= 0.02;
+                p.rotation.x += 0.2;
+                p.userData.life -= 0.05;
+                p.scale.setScalar(p.userData.life);
+                if(p.userData.life <= 0) { scene.remove(p); particles.splice(i,1); }
+            }
+
+            // 7. Win Condition
+            if(!cage && brother && camera.position.distanceTo(brother.position) < 5) {
+                win();
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function createExplosion(pos, col) {
+            AudioSys.boom();
+            for(let i=0; i<15; i++) spawnParticle(pos, col);
+        }
+
+        function updateHUD() {
+            document.getElementById('hp-txt').innerText = Math.max(0, Math.floor(hp));
+            if(hp <= 0) {
+                isPlaying = false;
+                alert("OOF! VULVIAN DOWN. THE CAKE WAS A LIE. RELOADING...");
+                location.reload();
+            }
+        }
+
+        function win() {
+            isPlaying = false;
+            brother.userData.bubble.visible = true; // "Thx bro"
+            document.getElementById('win-screen').style.display = 'flex';
+        }
+
+        function onResize() {
+            camera.aspect = window.innerWidth/window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+    </script>
+</body>
+</html>
